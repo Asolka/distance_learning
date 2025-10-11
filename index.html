@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz de Tri des Déchets</title>
+</head>
+
+<body>
+    <div class="background-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <button class="btn-home" onclick="goHome()">Accueil</button>
+
+    <div class="container">
+        <h1 id="title">Sais-tu trier les déchets ?</h1>
+
+        <div id="initial-buttons" class="buttons-container">
+            <button class="btn btn-yes" onclick="handleYes()">Oui</button>
+            <button class="btn btn-no" onclick="handleNo()">Non</button>
+        </div>
+
+        <div id="quiz-section" class="buttons-container hidden">
+            <button class="btn btn-poubelle btn-noire" onclick="checkAnswer('noire', this)">Noire</button>
+            <button class="btn btn-poubelle btn-jaune" onclick="checkAnswer('jaune', this)">Jaune</button>
+            <button class="btn btn-poubelle btn-bleue" onclick="checkAnswer('bleue', this)">Bleue</button>
+        </div>
+
+        <div id="feedback-container"></div>
+
+        <div id="learning-section" class="learning-section">
+            <div class="bins-container">
+                <div class="bin bin-noire">
+                    <div class="bin-icon">🗑️</div>
+                    <div class="bin-title">Poubelle Noire</div>
+                    <div class="bin-info">
+                        Déchets non recyclables : emballages sales, films plastiques, polystyrène, couches, mouchoirs
+                    </div>
+                </div>
+                <div class="bin bin-jaune">
+                    <div class="bin-icon">♻️</div>
+                    <div class="bin-title">Poubelle Jaune</div>
+                    <div class="bin-info">
+                        Emballages recyclables : bouteilles plastiques, cartons, canettes, conserves métalliques,
+                        briques alimentaires
+                    </div>
+                </div>
+                <div class="bin bin-bleue">
+                    <div class="bin-icon">🔵</div>
+                    <div class="bin-title">Poubelle Bleue</div>
+                    <div class="bin-info">
+                        Verre uniquement : bouteilles, pots et bocaux en verre (sans bouchons ni couvercles)
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-understand" onclick="backToStart()">Clique ici quand tu as compris</button>
+        </div>
+    </div>
+</body>
+
+</html>
