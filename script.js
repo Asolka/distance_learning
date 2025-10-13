@@ -1,60 +1,82 @@
-let userKnowsRecycling = false;
+// ===== VARIABLES GLOBALES =====
+// Enregistre si l'utilisateur a dit qu'il savait trier
+let utilisateurSaitTrier = false;
 
-function handleYes() {
-    userKnowsRecycling = true;
-    document.getElementById('title').textContent = "D'accord on va vérifier ça, dans quelle poubelle jettes-tu une bouteille ?";
-    document.getElementById('initial-buttons').classList.add('hidden');
-    document.getElementById('quiz-section').classList.remove('hidden');
+// ===== FONCTIONS DE NAVIGATION =====
+
+// Quand l'utilisateur clique sur "Oui"
+function choisirOui() {
+    utilisateurSaitTrier = true;
+
+    // Changer le titre
+    document.getElementById('titre').textContent = "D'accord on va vérifier ça, dans quelle poubelle jettes-tu une bouteille en plastique?";
+
+    // Cacher les boutons de la page initiale et afficher le quiz
+    document.getElementById('page-initiale').classList.add('hide');
+    document.getElementById('page-quiz').classList.remove('hide');
 }
 
-function handleNo() {
-    userKnowsRecycling = false;
-    document.getElementById('title').textContent = "Alors on va apprendre ensemble";
-    document.getElementById('initial-buttons').classList.add('hidden');
-    document.getElementById('learning-section').style.display = 'block';
+// Quand l'utilisateur clique sur "Non"
+function choisirNon() {
+    utilisateurSaitTrier = false;
+
+    // Changer le titre
+    document.getElementById('titre').textContent = "Alors on va apprendre ensemble";
+
+    // Cacher la page initiale et afficher l'apprentissage
+    document.getElementById('page-initiale').classList.add('hide');
+    document.getElementById('page-apprentissage').style.display = 'block';
 }
 
-function checkAnswer(color, button) {
-    const feedbackContainer = document.getElementById('feedback-container');
-    const allButtons = document.querySelectorAll('#quiz-section .btn-poubelle');
+// ===== FONCTION DE VÉRIFICATION DES RÉPONSES =====
 
-    // Désactiver tous les boutons pour éviter les clics multiples
-    allButtons.forEach(btn => btn.style.pointerEvents = 'none');
+function verifierReponse(couleur, bouton) {
+    const zoneMessage = document.getElementById('zone-message');
+    const tousBoutons = document.querySelectorAll('#page-quiz .bouton-poubelle');
 
-    if (color === 'jaune') {
-        // Bonne réponse
-        button.classList.add('btn-correct');
+    // Désactiver tous les boutons pendant l'animation
+    tousBoutons.forEach(btn => btn.style.pointerEvents = 'none');
 
+    // Si c'est la bonne réponse (jaune pour une bouteille plastique)
+    if (couleur === 'jaune') {
+        // Ajouter l'animation de succès au bouton
+        bouton.classList.add('bouton-correct');
+
+        // Attendre un peu puis afficher le message de succès
         setTimeout(() => {
-            feedbackContainer.innerHTML = `
-                        <div class="feedback-message feedback-correct">
+            zoneMessage.innerHTML = `
+                        <div class="message message-correct">
                             🎉 Bravo, c'est la bonne réponse !
                         </div>
-                        <button class="btn-next" onclick="nextStep()">Suivant</button>
+                        <button class="bouton-suivant" onclick="etapeSuivante()">Suivant</button>
                     `;
         }, 600);
-    } else {
-        // Mauvaise réponse - le bouton reste rayé
-        button.classList.add('btn-wrong');
+    }
+    // Si c'est une mauvaise réponse
+    else {
+        // Ajouter l'animation d'erreur (tremblement + rayure)
+        bouton.classList.add('bouton-incorrect');
 
-        let message = '';
-        if (color === 'bleue') {
-            message = '🤔 Presque ! La poubelle bleue est pour le verre. Une bouteille en plastique va dans la poubelle jaune !';
+        // Choisir le message selon la couleur
+        let texteMessage = '';
+        if (couleur === 'bleue') {
+            texteMessage = '🤔 Presque ! La poubelle bleue est pour le verre.';
         } else {
-            message = '😊 Pas tout à fait ! Une bouteille en plastique est recyclable, elle va dans la poubelle jaune !';
+            texteMessage = '😊 Pas tout à fait ! La poubelle noire est pour les déchets ménagers.';
         }
 
+        // Attendre un peu puis afficher le message d'erreur
         setTimeout(() => {
-            feedbackContainer.innerHTML = `
-                        <div class="feedback-message feedback-wrong">
-                            ${message}
+            zoneMessage.innerHTML = `
+                        <div class="message message-incorrect">
+                            ${texteMessage}
                         </div>
                     `;
 
-            // Réactiver seulement les boutons non rayés après 1 seconde
+            // Réactiver les boutons non rayés après 1 seconde
             setTimeout(() => {
-                allButtons.forEach(btn => {
-                    if (!btn.classList.contains('btn-wrong')) {
+                tousBoutons.forEach(btn => {
+                    if (!btn.classList.contains('bouton-incorrect')) {
                         btn.style.pointerEvents = 'auto';
                     }
                 });
@@ -62,39 +84,50 @@ function checkAnswer(color, button) {
 
             // Faire disparaître le message après 5 secondes
             setTimeout(() => {
-                feedbackContainer.innerHTML = '';
+                zoneMessage.innerHTML = '';
             }, 5000);
         }, 500);
     }
 }
 
-function nextStep() {
-    // Pour l'instant, cette fonction ne fait rien
-    // Tu pourras ajouter la logique pour la suite du quiz ici
-    console.log('Passage à l\'étape suivante...');
+// ===== FONCTION POUR L'ÉTAPE SUIVANTE =====
+// Pour l'instant cette fonction fait rien
+function etapeSuivante() {
+    console.log('Passage à la question suivante...');
 }
 
-function goHome() {
-    // Réinitialiser tout
-    document.getElementById('title').textContent = "Sais-tu trier les déchets ?";
-    document.getElementById('initial-buttons').classList.remove('hidden');
-    document.getElementById('quiz-section').classList.add('hidden');
-    document.getElementById('learning-section').style.display = 'none';
-    document.getElementById('feedback-container').innerHTML = '';
+// ===== FONCTION DE RETOUR À L'ACCUEIL =====
+// Réinitialise tout et retourne à la première page
+function retourAccueil() {
+    // Remettre le titre initial
+    document.getElementById('titre').textContent = "Sais-tu trier les déchets ?";
 
-    // Réinitialiser les boutons
-    const allButtons = document.querySelectorAll('#quiz-section .btn-poubelle');
-    allButtons.forEach(btn => {
-        btn.classList.remove('btn-wrong', 'btn-correct');
+    // Afficher la page initiale
+    document.getElementById('page-initiale').classList.remove('hide');
+
+    // Cacher les autres pages
+    document.getElementById('page-quiz').classList.add('hide');
+    document.getElementById('page-apprentissage').style.display = 'none';
+
+    // Effacer les messages
+    document.getElementById('zone-message').innerHTML = '';
+
+    // Réinitialiser tous les boutons du quiz
+    const tousBoutons = document.querySelectorAll('#page-quiz .bouton-poubelle');
+    tousBoutons.forEach(btn => {
+        btn.classList.remove('bouton-incorrect', 'bouton-correct');
         btn.style.pointerEvents = 'auto';
     });
 
-    userKnowsRecycling = false;
+    // Réinitialiser la variable
+    utilisateurSaitTrier = false;
 }
 
-function backToStart() {
-    document.getElementById('title').textContent = "Sais-tu trier les déchets ?";
-    document.getElementById('learning-section').style.display = 'none';
-    document.getElementById('initial-buttons').classList.remove('hidden');
-    document.getElementById('quiz-section').classList.add('hidden');
+// ===== FONCTION APRÈS L'APPRENTISSAGE =====
+// Retour au début après avoir cliqué sur "J'ai compris"
+function retourDebut() {
+    document.getElementById('titre').textContent = "Sais-tu trier les déchets ?";
+    document.getElementById('page-apprentissage').style.display = 'none';
+    document.getElementById('page-initiale').classList.remove('hide');
+    document.getElementById('page-quiz').classList.add('hide');
 }

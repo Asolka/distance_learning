@@ -10,58 +10,73 @@
 </head>
 
 <body>
-    <div class="background-shapes">
-        <div class="shape"></div>
-        <div class="shape"></div>
-        <div class="shape"></div>
-        <div class="shape"></div>
-        <div class="shape"></div>
+    <!-- Formes animées en arrière-plan -->
+    <div class="fond-anime">
+        <div class="forme"></div>
+        <div class="forme"></div>
+        <div class="forme"></div>
+        <div class="forme"></div>
+        <div class="forme"></div>
     </div>
 
-    <button class="btn-home" onclick="goHome()">Accueil</button>
+    <!-- Bouton pour retourner à l'accueil -->
+    <button class="bouton-accueil" onclick="retourAccueil()">Accueil</button>
 
+    <!-- Contenu principal du quiz -->
     <div class="container">
-        <h1 id="title">Sais-tu trier les déchets ?</h1>
+        <!-- Titre qui change selon l'étape -->
+        <h1 id="titre" class="titre">Sais-tu trier les déchets ?</h1>
 
-        <div id="initial-buttons" class="buttons-container">
-            <button class="btn btn-yes" onclick="handleYes()">Oui</button>
-            <button class="btn btn-no" onclick="handleNo()">Non</button>
+        <!-- Page 1 : Boutons Oui/Non -->
+        <div id="page-initiale" class="zone-boutons">
+            <button class="bouton bouton-oui" onclick="choisirOui()">Oui</button>
+            <button class="bouton bouton-non" onclick="choisirNon()">Non</button>
         </div>
 
-        <div id="quiz-section" class="buttons-container hidden">
-            <button class="btn btn-poubelle btn-noire" onclick="checkAnswer('noire', this)">Noire</button>
-            <button class="btn btn-poubelle btn-jaune" onclick="checkAnswer('jaune', this)">Jaune</button>
-            <button class="btn btn-poubelle btn-bleue" onclick="checkAnswer('bleue', this)">Bleue</button>
+        <!-- Page 2 : Quiz avec les 3 poubelles -->
+        <div id="page-quiz" class="zone-boutons cache">
+            <button class="bouton bouton-poubelle poubelle-noire" onclick="verifierReponse('noire', this)">Noire</button>
+            <button class="bouton bouton-poubelle poubelle-jaune" onclick="verifierReponse('jaune', this)">Jaune</button>
+            <button class="bouton bouton-poubelle poubelle-bleue" onclick="verifierReponse('bleue', this)">Bleue</button>
         </div>
 
-        <div id="feedback-container"></div>
+        <!-- Zone où s'affichent les messages de feedback -->
+        <div id="zone-message" class="zone-message"></div>
 
-        <div id="learning-section" class="learning-section">
-            <div class="bins-container">
-                <div class="bin bin-noire">
-                    <div class="bin-icon">🗑️</div>
-                    <div class="bin-title">Poubelle Noire</div>
-                    <div class="bin-info">
+        <!-- Page 3 : Section d'apprentissage -->
+        <div id="page-apprentissage" class="section-apprentissage">
+            <div class="zone-poubelles">
+                <!-- Carte poubelle noire -->
+                <div class="carte-poubelle poubelle-noire">
+                    <div class="icone-poubelle">🗑️</div>
+                    <div class="titre-poubelle">Poubelle Noire</div>
+                    <div class="info-poubelle">
                         Déchets non recyclables : emballages sales, films plastiques, polystyrène, couches, mouchoirs
                     </div>
                 </div>
-                <div class="bin bin-jaune">
-                    <div class="bin-icon">♻️</div>
-                    <div class="bin-title">Poubelle Jaune</div>
-                    <div class="bin-info">
+
+                <!-- Carte poubelle jaune -->
+                <div class="carte-poubelle poubelle-jaune">
+                    <div class="icone-poubelle">♻️</div>
+                    <div class="titre-poubelle">Poubelle Jaune</div>
+                    <div class="info-poubelle">
                         Emballages recyclables : bouteilles plastiques, cartons, canettes, conserves métalliques,
                         briques alimentaires
                     </div>
                 </div>
-                <div class="bin bin-bleue">
-                    <div class="bin-icon">🔵</div>
-                    <div class="bin-title">Poubelle Bleue</div>
-                    <div class="bin-info">
+
+                <!-- Carte poubelle bleue -->
+                <div class="carte-poubelle poubelle-bleue">
+                    <div class="icone-poubelle">🔵</div>
+                    <div class="titre-poubelle">Poubelle Bleue</div>
+                    <div class="info-poubelle">
                         Verre uniquement : bouteilles, pots et bocaux en verre (sans bouchons ni couvercles)
                     </div>
                 </div>
             </div>
-            <button class="btn btn-understand" onclick="backToStart()">Clique ici quand tu as compris</button>
+
+            <!-- Bouton pour retourner au début après avoir appris -->
+            <button class="bouton bouton-compris" onclick="retourDebut()">Clique ici quand tu as compris</button>
         </div>
     </div>
 </body>

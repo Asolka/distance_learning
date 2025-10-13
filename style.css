@@ -1,3 +1,4 @@
+/* ===== RÉINITIALISATION ET BASE ===== */
 * {
     margin: 0;
     padding: 0;
@@ -15,8 +16,8 @@ body {
     overflow: hidden;
 }
 
-/* Background animé avec formes */
-.background-shapes {
+/* ===== FOND ANIMÉ AVEC FORMES COLORÉES ===== */
+.fond-anime {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -24,14 +25,15 @@ body {
     z-index: 0;
 }
 
-.shape {
+.forme {
     position: absolute;
     border-radius: 50%;
     opacity: 0.15;
-    animation: float 20s infinite ease-in-out;
+    animation: flotter 20s infinite ease-in-out;
 }
 
-.shape:nth-child(1) {
+/* Chaque forme a sa propre taille, couleur et position */
+.forme:nth-child(1) {
     width: 300px;
     height: 300px;
     background: #ffd700;
@@ -40,7 +42,7 @@ body {
     animation-delay: 0s;
 }
 
-.shape:nth-child(2) {
+.forme:nth-child(2) {
     width: 200px;
     height: 200px;
     background: #00d4ff;
@@ -49,7 +51,7 @@ body {
     animation-delay: 3s;
 }
 
-.shape:nth-child(3) {
+.forme:nth-child(3) {
     width: 250px;
     height: 250px;
     background: #ff6b9d;
@@ -58,7 +60,7 @@ body {
     animation-delay: 1.5s;
 }
 
-.shape:nth-child(4) {
+.forme:nth-child(4) {
     width: 180px;
     height: 180px;
     background: #00ff88;
@@ -67,7 +69,7 @@ body {
     animation-delay: 4s;
 }
 
-.shape:nth-child(5) {
+.forme:nth-child(5) {
     width: 220px;
     height: 220px;
     background: #ffaa00;
@@ -76,7 +78,8 @@ body {
     animation-delay: 2s;
 }
 
-@keyframes float {
+/* Animation de flottement pour les formes */
+@keyframes flotter {
 
     0%,
     100% {
@@ -92,6 +95,7 @@ body {
     }
 }
 
+/* ===== CONTENU PRINCIPAL ===== */
 .container {
     position: relative;
     z-index: 1;
@@ -101,15 +105,17 @@ body {
     padding: 20px;
 }
 
-h1 {
+/* Titre principal avec animation d'arrivée */
+.titre {
     color: white;
     font-size: 3em;
     margin-bottom: 60px;
     text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
-    animation: slideDown 0.8s ease-out;
+    animation: descendre 0.8s ease-out;
 }
 
-@keyframes slideDown {
+/* Animation du titre qui descend du haut */
+@keyframes descendre {
     from {
         transform: translateY(-100px);
         opacity: 0;
@@ -121,14 +127,17 @@ h1 {
     }
 }
 
-.buttons-container {
+/* ===== BOUTONS ===== */
+/* Conteneur pour aligner les boutons */
+.zone-boutons {
     display: flex;
     gap: 40px;
     justify-content: center;
     flex-wrap: wrap;
 }
 
-.btn {
+/* Style de base pour tous les boutons */
+.bouton {
     padding: 40px 80px;
     font-size: 2.5em;
     font-weight: bold;
@@ -141,129 +150,57 @@ h1 {
     overflow: hidden;
 }
 
-.btn-yes {
+/* Bouton "Oui" en vert */
+.bouton-oui {
     background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
     color: white;
 }
 
-.btn-no {
+/* Bouton "Non" en rouge */
+.bouton-non {
     background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
     color: white;
 }
 
-.btn:hover {
+/* Animation au survol des boutons */
+.bouton:hover {
     transform: translateY(-10px) scale(1.05);
     box-shadow: 0 0 40px rgba(255, 255, 255, 0.8);
 }
 
-.btn:active {
+.bouton:active {
     transform: translateY(-5px) scale(1.02);
 }
 
-/* Styles pour les boutons de poubelles */
-.btn-poubelle {
+/* ===== BOUTONS DES POUBELLES ===== */
+/* Taille réduite pour les boutons de choix de poubelle */
+.bouton-poubelle {
     padding: 30px 50px;
     font-size: 1.8em;
     min-width: 180px;
 }
 
-.btn-noire {
+/* Couleur noire pour la poubelle noire */
+.poubelle-noire {
     background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
     color: white;
 }
 
-.btn-jaune {
+/* Couleur jaune pour la poubelle jaune */
+.poubelle-jaune {
     background: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%);
     color: #2c3e50;
 }
 
-.btn-bleue {
+/* Couleur bleue pour la poubelle bleue */
+.poubelle-bleue {
     background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
     color: white;
 }
 
-/* Section apprentissage */
-.learning-section {
-    display: none;
-    margin-top: 40px;
-}
-
-.bins-container {
-    display: flex;
-    gap: 30px;
-    justify-content: center;
-    margin: 40px 0;
-    flex-wrap: wrap;
-}
-
-.bin {
-    width: 200px;
-    padding: 30px;
-    border-radius: 15px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-    position: relative;
-}
-
-.bin-noire {
-    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-    color: white;
-}
-
-.bin-jaune {
-    background: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%);
-    color: #2c3e50;
-}
-
-.bin-bleue {
-    background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
-    color: white;
-}
-
-.bin-icon {
-    font-size: 4em;
-    margin-bottom: 10px;
-}
-
-.bin-title {
-    font-size: 1.5em;
-    font-weight: bold;
-    margin-bottom: 15px;
-}
-
-.bin-info {
-    font-size: 0.9em;
-    opacity: 0;
-    max-height: 0;
-    overflow: hidden;
-    transition: all 0.3s ease;
-}
-
-.bin:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 40px rgba(255, 255, 255, 0.6);
-}
-
-.bin:hover .bin-info {
-    opacity: 1;
-    max-height: 200px;
-}
-
-.btn-understand {
-    margin-top: 30px;
-    padding: 20px 60px;
-    font-size: 1.5em;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-}
-
-.hidden {
-    display: none;
-}
-
-/* Animations pour les réponses */
-@keyframes shake {
+/* ===== ANIMATIONS POUR LES RÉPONSES ===== */
+/* Animation de tremblement pour mauvaise réponse */
+@keyframes trembler {
 
     0%,
     100% {
@@ -286,13 +223,15 @@ h1 {
     }
 }
 
-@keyframes strikethrough {
+/* Animation de la ligne qui raye le bouton */
+@keyframes rayer {
     to {
         width: 100%;
     }
 }
 
-@keyframes correctPulse {
+/* Animation de pulsation pour bonne réponse */
+@keyframes pulser {
     0% {
         transform: scale(1);
     }
@@ -306,13 +245,15 @@ h1 {
     }
 }
 
-.btn-wrong {
-    animation: shake 0.5s ease-in-out;
+/* Style pour bouton incorrect (tremble et se raye) */
+.bouton-incorrect {
+    animation: trembler 0.5s ease-in-out;
     position: relative;
     opacity: 0.6;
 }
 
-.btn-wrong::after {
+/* Ligne rouge qui traverse le bouton incorrect */
+.bouton-incorrect::after {
     content: '';
     position: absolute;
     top: 50%;
@@ -320,16 +261,23 @@ h1 {
     width: 0;
     height: 4px;
     background: #e74c3c;
-    animation: strikethrough 0.4s ease-out forwards;
+    animation: rayer 0.4s ease-out forwards;
     box-shadow: 0 0 10px #e74c3c;
 }
 
-.btn-correct {
-    animation: correctPulse 0.6s ease-out forwards;
+/* Style pour bouton correct (s'agrandit et brille) */
+.bouton-correct {
+    animation: pulser 0.6s ease-out forwards;
     box-shadow: 0 0 50px rgba(46, 204, 113, 0.8) !important;
 }
 
-.feedback-message {
+/* ===== MESSAGES DE FEEDBACK ===== */
+.zone-message {
+    margin-top: 30px;
+}
+
+/* Style du message de feedback */
+.message {
     margin-top: 30px;
     padding: 25px 40px;
     border-radius: 15px;
@@ -337,21 +285,24 @@ h1 {
     color: white;
     text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3);
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-    animation: fadeIn 0.5s ease-out;
+    animation: apparaitre 0.5s ease-out;
     max-width: 600px;
     margin-left: auto;
     margin-right: auto;
 }
 
-.feedback-wrong {
+/* Message rouge pour mauvaise réponse */
+.message-incorrect {
     background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
 }
 
-.feedback-correct {
+/* Message vert pour bonne réponse */
+.message-correct {
     background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
 }
 
-@keyframes fadeIn {
+/* Animation d'apparition des messages */
+@keyframes apparaitre {
     from {
         opacity: 0;
         transform: translateY(-20px);
@@ -363,7 +314,8 @@ h1 {
     }
 }
 
-.btn-next {
+/* Bouton "Suivant" après bonne réponse */
+.bouton-suivant {
     margin-top: 20px;
     padding: 20px 50px;
     font-size: 1.5em;
@@ -374,16 +326,16 @@ h1 {
     cursor: pointer;
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
     transition: all 0.3s ease;
-    animation: fadeIn 0.8s ease-out;
+    animation: apparaitre 0.8s ease-out;
 }
 
-.btn-next:hover {
+.bouton-suivant:hover {
     transform: translateY(-5px) scale(1.05);
     box-shadow: 0 0 40px rgba(255, 255, 255, 0.8);
 }
 
-/* Bouton d'accueil */
-.btn-home {
+/* ===== BOUTON ACCUEIL (COIN HAUT GAUCHE) ===== */
+.bouton-accueil {
     position: fixed;
     top: 20px;
     left: 20px;
@@ -400,16 +352,86 @@ h1 {
     font-weight: bold;
 }
 
-.btn-home:hover {
+.bouton-accueil:hover {
     transform: scale(1.1);
     box-shadow: 0 0 25px rgba(255, 255, 255, 0.7);
 }
 
-.btn-home::before {
+.bouton-accueil::before {
     content: '🏠 ';
 }
 
-/* Container pour les messages */
-#feedback-container {
+/* ===== SECTION APPRENTISSAGE ===== */
+.section-apprentissage {
+    display: none;
+    margin-top: 40px;
+}
+
+/* Conteneur des 3 poubelles pour apprendre */
+.zone-poubelles {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    margin: 40px 0;
+    flex-wrap: wrap;
+}
+
+/* Carte de poubelle interactive */
+.carte-poubelle {
+    width: 200px;
+    padding: 30px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    position: relative;
+}
+
+/* Icône de la poubelle (emoji) */
+.icone-poubelle {
+    font-size: 4em;
+    margin-bottom: 10px;
+}
+
+/* Titre de la carte (ex: "Poubelle Jaune") */
+.titre-poubelle {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+/* Information cachée, visible au survol */
+.info-poubelle {
+    font-size: 0.9em;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+/* Animation au survol de la carte */
+.carte-poubelle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 40px rgba(255, 255, 255, 0.6);
+}
+
+/* Afficher l'information au survol */
+.carte-poubelle:hover .info-poubelle {
+    opacity: 1;
+    max-height: 200px;
+}
+
+/* Bouton pour revenir à l'accueil après apprentissage */
+.bouton-compris {
     margin-top: 30px;
+    padding: 20px 60px;
+    font-size: 1.5em;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+/* ===== CLASSE UTILITAIRE ===== */
+/* Cache un élément */
+.hide {
+    display: none;
 }
