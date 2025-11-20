@@ -6,7 +6,7 @@
     <script src="script.js" defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz de Tri des Déchets</title>
+    <title>English Quest</title>
 </head>
 
 <body>
@@ -19,64 +19,49 @@
         <div class="forme"></div>
     </div>
 
-    <!-- Bouton pour retourner à l'accueil -->
-    <button class="bouton-accueil" onclick="retourAccueil()">Accueil</button>
-
-    <!-- Contenu principal du quiz -->
     <div class="container">
-        <!-- Titre qui change selon l'étape -->
-        <h1 id="titre" class="titre">Sais-tu trier les déchets ?</h1>
-
-        <!-- Page 1 : Boutons Oui/Non -->
-        <div id="page-initiale" class="zone-boutons">
-            <button class="bouton bouton-oui" onclick="choisirOui()">Oui</button>
-            <button class="bouton bouton-non" onclick="choisirNon()">Non</button>
+        <!-- PAGE D'ACCUEIL -->
+        <div class="page-accueil" id="pageAccueil">
+            <h1 class="titre-principal">🌍 English class 🌍</h1>
+            <div class="formulaire-prenom">
+                <label for="inputPrenom">What's your name !</label>
+                <input type="text" id="inputPrenom" placeholder="Name..." maxlength="20">
+                <button class="bouton-commencer" id="btnCommencer" disabled>Play !</button>
+            </div>
         </div>
 
-        <!-- Page 2 : Quiz avec les 3 poubelles -->
-        <div id="page-quiz" class="zone-boutons cache">
-            <button class="bouton bouton-poubelle poubelle-noire" onclick="verifierReponse('noire', this)">Noire</button>
-            <button class="bouton bouton-poubelle poubelle-jaune" onclick="verifierReponse('jaune', this)">Jaune</button>
-            <button class="bouton bouton-poubelle poubelle-bleue" onclick="verifierReponse('bleue', this)">Bleue</button>
+        <!-- CARTE DE PROGRESSION -->
+        <div class="carte-progression" id="carteProgression">
+            <h2 class="titre-bienvenue" id="titreBienvenue"></h2>
+
+            <svg class="chemin-niveaux" id="cheminNiveaux">
+                <!-- Les chemins seront dessinés en JavaScript -->
+            </svg>
+
+            <div class="conteneur-niveaux" id="conteneurNiveaux">
+                <!-- Les niveaux seront générés en JavaScript -->
+            </div>
         </div>
+    </div>
 
-        <!-- Zone où s'affichent les messages de feedback -->
-        <div id="zone-message" class="zone-message"></div>
-
-        <!-- Page 3 : Section d'apprentissage -->
-        <div id="page-apprentissage" class="section-apprentissage">
-            <div class="zone-poubelles">
-                <!-- Carte poubelle noire -->
-                <div class="carte-poubelle poubelle-noire">
-                    <div class="icone-poubelle">🗑️</div>
-                    <div class="titre-poubelle">Poubelle Noire</div>
-                    <div class="info-poubelle">
-                        Déchets non recyclables : emballages sales, films plastiques, polystyrène, couches, mouchoirs
+    <!-- BOÎTE DE DIALOGUE -->
+    <div class="dialogue-container" id="dialogueContainer">
+        <div class="dialogue-wrapper">
+            <div class="personnage-dialogue" id="personnageDialogue">
+                <img src="assets/cat.png" alt="Monsieur Chat">
+            </div>
+            <div class="dialogue-box">
+                <div class="contenu-dialogue">
+                    <div class="nom-personnage" id="nomPersonnage">Monsieur chat</div>
+                    <div class="texte-dialogue" id="texteDialogue">
+                        Welcome to your English Quest !
                     </div>
-                </div>
-
-                <!-- Carte poubelle jaune -->
-                <div class="carte-poubelle poubelle-jaune">
-                    <div class="icone-poubelle">♻️</div>
-                    <div class="titre-poubelle">Poubelle Jaune</div>
-                    <div class="info-poubelle">
-                        Emballages recyclables : bouteilles plastiques, cartons, canettes, conserves métalliques,
-                        briques alimentaires
+                    <div class="zone-exercice" id="zoneExercice" style="display: none;">
+                        <!-- L'exercice sera généré ici -->
                     </div>
-                </div>
-
-                <!-- Carte poubelle bleue -->
-                <div class="carte-poubelle poubelle-bleue">
-                    <div class="icone-poubelle">🔵</div>
-                    <div class="titre-poubelle">Poubelle Bleue</div>
-                    <div class="info-poubelle">
-                        Verre uniquement : bouteilles, pots et bocaux en verre (sans bouchons ni couvercles)
-                    </div>
+                    <button class="bouton-continuer" id="btnContinuer">Continue →</button>
                 </div>
             </div>
-
-            <!-- Bouton pour retourner au début après avoir appris -->
-            <button class="bouton bouton-compris" onclick="retourDebut()">Clique ici quand tu as compris</button>
         </div>
     </div>
 </body>

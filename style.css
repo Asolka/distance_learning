@@ -1,4 +1,5 @@
-/* ===== RÉINITIALISATION ET BASE ===== */
+@import url('https://fonts.googleapis.com/css2?family=Sour+Gummy:wght@400;700&display=swap');
+
 * {
     margin: 0;
     padding: 0;
@@ -6,23 +7,26 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Sour Gummy', sans-serif;
     min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-attachment: fixed;
+    position: relative;
+    margin: 0;
+    padding: 0;
     display: flex;
     justify-content: center;
-    align-items: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    position: relative;
-    overflow: hidden;
+    align-items: flex-start;
 }
 
-/* ===== FOND ANIMÉ AVEC FORMES COLORÉES ===== */
 .fond-anime {
-    position: absolute;
+    position: fixed;
     width: 100%;
     height: 100%;
     overflow: hidden;
     z-index: 0;
+    top: 0;
+    left: 0;
 }
 
 .forme {
@@ -32,7 +36,6 @@ body {
     animation: flotter 20s infinite ease-in-out;
 }
 
-/* Chaque forme a sa propre taille, couleur et position */
 .forme:nth-child(1) {
     width: 300px;
     height: 300px;
@@ -78,7 +81,6 @@ body {
     animation-delay: 2s;
 }
 
-/* Animation de flottement pour les formes */
 @keyframes flotter {
 
     0%,
@@ -95,7 +97,6 @@ body {
     }
 }
 
-/* ===== CONTENU PRINCIPAL ===== */
 .container {
     position: relative;
     z-index: 1;
@@ -105,16 +106,23 @@ body {
     padding: 20px;
 }
 
-/* Titre principal avec animation d'arrivée */
-.titre {
+.page-accueil {
+    animation: apparaitre 0.8s ease-out;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.titre-principal {
     color: white;
-    font-size: 3em;
-    margin-bottom: 60px;
+    font-size: 3.5em;
+    margin-bottom: 40px;
     text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
     animation: descendre 0.8s ease-out;
 }
 
-/* Animation du titre qui descend du haut */
 @keyframes descendre {
     from {
         transform: translateY(-100px);
@@ -127,311 +135,535 @@ body {
     }
 }
 
-/* ===== BOUTONS ===== */
-/* Conteneur pour aligner les boutons */
-.zone-boutons {
-    display: flex;
-    gap: 40px;
-    justify-content: center;
-    flex-wrap: wrap;
+.formulaire-prenom {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    padding: 50px 40px;
+    border-radius: 25px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    animation: apparaitre 1s ease-out 0.3s both;
 }
 
-/* Style de base pour tous les boutons */
-.bouton {
-    padding: 40px 80px;
-    font-size: 2.5em;
+.formulaire-prenom label {
+    display: block;
+    font-size: 1.8em;
+    color: white;
+    margin-bottom: 20px;
     font-weight: bold;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.formulaire-prenom input {
+    width: 100%;
+    padding: 20px;
+    font-size: 1.5em;
+    border: 3px solid #667eea;
+    border-radius: 15px;
+    text-align: center;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.formulaire-prenom input:focus {
+    border-color: #764ba2;
+    box-shadow: 0 0 20px rgba(118, 75, 162, 0.4);
+}
+
+.bouton-commencer {
+    margin-top: 30px;
+    padding: 20px 60px;
+    font-size: 1.8em;
+    font-weight: bold;
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color: white;
     border: none;
     border-radius: 20px;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    box-shadow: 0 5px 20px rgba(56, 239, 125, 0.4);
+}
+
+.bouton-commencer:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 8px 30px rgba(56, 239, 125, 0.6);
+}
+
+.bouton-commencer:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.carte-progression {
+    display: none;
+    min-height: 100vh;
     position: relative;
-    overflow: hidden;
+    padding: 40px 0;
+    width: 100%;
 }
 
-/* Bouton "Oui" en vert */
-.bouton-oui {
-    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+.titre-bienvenue {
     color: white;
+    font-size: 2.5em;
+    margin-bottom: 60px;
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+    position: sticky;
+    top: 20px;
+    z-index: 10;
+    background: rgba(102, 126, 234, 0.3);
+    padding: 15px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    margin-left: auto;
+    margin-right: auto;
+    max-width: fit-content;
 }
 
-/* Bouton "Non" en rouge */
-.bouton-non {
-    background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+.chemin-niveaux {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 900px;
+    height: 100%;
+    pointer-events: none;
+}
+
+.conteneur-niveaux {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    min-height: 800px;
+    padding: 20px;
+    padding-bottom: 100px;
+    margin: 0 auto;
+}
+
+.niveau {
+    position: absolute;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
     color: white;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    z-index: 2;
 }
 
-/* Animation au survol des boutons */
-.bouton:hover {
-    transform: translateY(-10px) scale(1.05);
-    box-shadow: 0 0 40px rgba(255, 255, 255, 0.8);
+.niveau-exercice {
+    width: 175px;
+    height: 175px;
+    font-size: 1.5em;
 }
 
-.bouton:active {
-    transform: translateY(-5px) scale(1.02);
+.niveau-cours {
+    width: 120px;
+    height: 120px;
+    font-size: 1.2em;
 }
 
-/* ===== BOUTONS DES POUBELLES ===== */
-/* Taille réduite pour les boutons de choix de poubelle */
-.bouton-poubelle {
-    padding: 30px 50px;
-    font-size: 1.8em;
-    min-width: 180px;
+.niveau-cours:not(.niveau-complete):not(.niveau-verrouille) {
+    background: linear-gradient(135deg, #89CFF0 0%, #5DADE2 100%) !important;
 }
 
-/* Couleur noire pour la poubelle noire */
-.poubelle-noire {
-    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-    color: white;
+.niveau-cours .numero-niveau {
+    font-size: 2em;
 }
 
-/* Couleur jaune pour la poubelle jaune */
-.poubelle-jaune {
-    background: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%);
-    color: #2c3e50;
+.niveau-ritual,
+.niveau-evaluation {
+    width: 200px;
+    height: 200px;
+    font-size: 2em;
 }
 
-/* Couleur bleue pour la poubelle bleue */
-.poubelle-bleue {
-    background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
-    color: white;
+.niveau-ritual {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    border: 5px solid #ffffff;
+    box-shadow: 0 8px 30px rgba(231, 76, 60, 0.6);
 }
 
-/* ===== ANIMATIONS POUR LES RÉPONSES ===== */
-/* Animation de tremblement pour mauvaise réponse */
-@keyframes trembler {
+.niveau-ritual.niveau-actif {
+    animation: pulsation-ritual 2s infinite;
+}
+
+@keyframes pulsation-ritual {
 
     0%,
     100% {
-        transform: translateX(0);
-    }
-
-    10%,
-    30%,
-    50%,
-    70%,
-    90% {
-        transform: translateX(-10px);
-    }
-
-    20%,
-    40%,
-    60%,
-    80% {
-        transform: translateX(10px);
-    }
-}
-
-/* Animation de la ligne qui raye le bouton */
-@keyframes rayer {
-    to {
-        width: 100%;
-    }
-}
-
-/* Animation de pulsation pour bonne réponse */
-@keyframes pulser {
-    0% {
         transform: scale(1);
+        box-shadow: 0 8px 30px rgba(231, 76, 60, 0.6);
     }
 
     50% {
-        transform: scale(1.15);
-    }
-
-    100% {
-        transform: scale(1.1);
+        transform: scale(1.08);
+        box-shadow: 0 12px 40px rgba(231, 76, 60, 0.9), 0 0 50px #ff6b9d;
     }
 }
 
-/* Style pour bouton incorrect (tremble et se raye) */
-.bouton-incorrect {
-    animation: trembler 0.5s ease-in-out;
-    position: relative;
+.niveau-evaluation {
+    background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+    border: 5px solid gold;
+    box-shadow: 0 8px 30px rgba(155, 89, 182, 0.6);
+}
+
+.niveau-evaluation .numero-niveau,
+.niveau-ritual .numero-niveau {
+    font-size: 3.5em;
+}
+
+.niveau-evaluation.niveau-actif {
+    animation: pulsation-eval 2s infinite;
+}
+
+@keyframes pulsation-eval {
+
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 8px 30px rgba(155, 89, 182, 0.6);
+    }
+
+    50% {
+        transform: scale(1.08);
+        box-shadow: 0 12px 40px rgba(155, 89, 182, 0.9), 0 0 50px gold;
+    }
+}
+
+.niveau-actif {
+    background: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%);
+    animation: pulsation 2s infinite;
+}
+
+.niveau-complete {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.niveau-verrouille {
+    background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+    cursor: not-allowed;
     opacity: 0.6;
 }
 
-/* Ligne rouge qui traverse le bouton incorrect */
-.bouton-incorrect::after {
-    content: '';
+.niveau:not(.niveau-verrouille):hover {
+    transform: scale(1.15);
+    box-shadow: 0 10px 40px rgba(255, 255, 255, 0.5);
+}
+
+@keyframes pulsation {
+
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 5px 20px rgba(243, 156, 18, 0.4);
+    }
+
+    50% {
+        transform: scale(1.08);
+        box-shadow: 0 8px 30px rgba(243, 156, 18, 0.7);
+    }
+}
+
+.numero-niveau {
+    font-size: 3em;
+}
+
+.nom-niveau {
+    font-size: 1em;
+    margin-top: 5px;
+}
+
+.icone-complete {
     position: absolute;
-    top: 50%;
+    top: -10px;
+    right: -10px;
+    width: 70px;
+    height: 70px;
+    background: #27ae60;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+}
+
+.icone-verrouille {
+    position: absolute;
+    font-size: 3em;
+}
+
+.dialogue-container {
+    display: none;
+    position: fixed;
+    top: 0;
     left: 0;
-    width: 0;
-    height: 4px;
-    background: #e74c3c;
-    animation: rayer 0.4s ease-out forwards;
-    box-shadow: 0 0 10px #e74c3c;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fonduEntree 0.3s ease-out;
 }
 
-/* Style pour bouton correct (s'agrandit et brille) */
-.bouton-correct {
-    animation: pulser 0.6s ease-out forwards;
-    box-shadow: 0 0 50px rgba(46, 204, 113, 0.8) !important;
-}
-
-/* ===== MESSAGES DE FEEDBACK ===== */
-.zone-message {
-    margin-top: 30px;
-}
-
-/* Style du message de feedback */
-.message {
-    margin-top: 30px;
-    padding: 25px 40px;
-    border-radius: 15px;
-    font-size: 1.3em;
-    color: white;
-    text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3);
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-    animation: apparaitre 0.5s ease-out;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-/* Message rouge pour mauvaise réponse */
-.message-incorrect {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-}
-
-/* Message vert pour bonne réponse */
-.message-correct {
-    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-}
-
-/* Animation d'apparition des messages */
-@keyframes apparaitre {
+@keyframes fonduEntree {
     from {
         opacity: 0;
-        transform: translateY(-20px);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
     }
 }
 
-/* Bouton "Suivant" après bonne réponse */
-.bouton-suivant {
-    margin-top: 20px;
-    padding: 20px 50px;
-    font-size: 1.5em;
+.dialogue-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    animation: monterDialogue 0.5s ease-out;
+    max-width: 90%;
+}
+
+@keyframes monterDialogue {
+    from {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.personnage-dialogue {
+    width: 180px;
+    height: 180px;
+    background: white;
+    border-radius: 20px;
+    border: 5px solid #667eea;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 5em;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.personnage-dialogue img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.dialogue-box {
+    position: relative;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border: 5px solid #667eea;
+    border-radius: 25px;
+    padding: 30px;
+    padding-top: 60px;
+    width: 100%;
+    max-width: 700px;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+}
+
+.bouton-retour {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    width: 40px;
+    height: 40px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border: none;
-    border-radius: 15px;
+    border-radius: 10px;
+    font-size: 1.5em;
+    font-weight: bold;
     cursor: pointer;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: all 0.3s ease;
-    animation: apparaitre 0.8s ease-out;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
 }
 
-.bouton-suivant:hover {
-    transform: translateY(-5px) scale(1.05);
-    box-shadow: 0 0 40px rgba(255, 255, 255, 0.8);
+.bouton-retour:hover {
+    transform: translateX(-3px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
-/* ===== BOUTON ACCUEIL (COIN HAUT GAUCHE) ===== */
-.bouton-accueil {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    padding: 15px 30px;
+.contenu-dialogue {
+    margin: 0;
+}
+
+.nom-personnage {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #667eea;
+    margin-bottom: 15px;
+}
+
+.texte-dialogue {
     font-size: 1.2em;
+    color: #2c3e50;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.bouton-continuer {
+    float: right;
+    padding: 12px 30px;
+    font-size: 1.1em;
+    font-weight: bold;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border: none;
     border-radius: 12px;
     cursor: pointer;
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
     transition: all 0.3s ease;
-    z-index: 1000;
-    font-weight: bold;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
 }
 
-.bouton-accueil:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 25px rgba(255, 255, 255, 0.7);
+.bouton-continuer:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
-.bouton-accueil::before {
-    content: '🏠 ';
-}
-
-/* ===== SECTION APPRENTISSAGE ===== */
-.section-apprentissage {
-    display: none;
-    margin-top: 40px;
-}
-
-/* Conteneur des 3 poubelles pour apprendre */
-.zone-poubelles {
-    display: flex;
-    gap: 30px;
-    justify-content: center;
-    margin: 40px 0;
-    flex-wrap: wrap;
-}
-
-/* Carte de poubelle interactive */
-.carte-poubelle {
-    width: 200px;
-    padding: 30px;
+.zone-exercice {
+    margin: 20px 0;
+    padding: 20px;
+    background: rgba(102, 126, 234, 0.1);
     border-radius: 15px;
+}
+
+/* ===== RITUAL DATE ===== */
+.ritual-container {
+    text-align: center;
+}
+
+.ritual-titre {
+    font-size: 1.8em;
+    color: #667eea;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.date-selecteurs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+    margin: 20px 0;
+}
+
+.date-selecteurs select {
+    padding: 10px 15px;
+    font-size: 1.1em;
+    border: 3px solid #667eea;
+    border-radius: 10px;
+    background: white;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-    position: relative;
+    font-family: 'Sour Gummy', sans-serif;
+    min-width: 80px;
 }
 
-/* Icône de la poubelle (emoji) */
-.icone-poubelle {
-    font-size: 4em;
-    margin-bottom: 10px;
+.date-selecteurs select:focus {
+    outline: none;
+    box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
 }
 
-/* Titre de la carte (ex: "Poubelle Jaune") */
-.titre-poubelle {
+.date-selecteurs select.incorrect {
+    border-color: #e74c3c;
+    background: #ffe6e6;
+}
+
+.date-selecteurs select.correct {
+    border-color: #27ae60;
+    background: #e6ffe6;
+}
+
+.virgule {
     font-size: 1.5em;
+    color: #2c3e50;
     font-weight: bold;
-    margin-bottom: 15px;
 }
 
-/* Information cachée, visible au survol */
-.info-poubelle {
-    font-size: 0.9em;
-    opacity: 0;
-    max-height: 0;
-    overflow: hidden;
-    transition: all 0.3s ease;
-}
-
-/* Animation au survol de la carte */
-.carte-poubelle:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 40px rgba(255, 255, 255, 0.6);
-}
-
-/* Afficher l'information au survol */
-.carte-poubelle:hover .info-poubelle {
-    opacity: 1;
-    max-height: 200px;
-}
-
-/* Bouton pour revenir à l'accueil après apprentissage */
-.bouton-compris {
-    margin-top: 30px;
-    padding: 20px 60px;
-    font-size: 1.5em;
+.bouton-valider-date {
+    margin-top: 20px;
+    padding: 15px 40px;
+    font-size: 1.3em;
+    font-weight: bold;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
-/* ===== CLASSE UTILITAIRE ===== */
-/* Cache un élément */
-.hide {
-    display: none;
+.bouton-valider-date:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.6);
+}
+
+.message-date {
+    margin-top: 15px;
+    padding: 15px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.cache {
+    display: none !important;
+}
+
+@keyframes apparaitre {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@media (max-width: 768px) {
+    .titre-principal {
+        font-size: 2.5em;
+    }
+
+    .personnage-dialogue {
+        width: 150px;
+        height: 150px;
+        font-size: 4em;
+    }
+
+    .dialogue-wrapper {
+        flex-direction: column;
+    }
+
+    .date-selecteurs {
+        gap: 5px;
+    }
+
+    .date-selecteurs select {
+        font-size: 1em;
+        padding: 8px 10px;
+    }
 }
