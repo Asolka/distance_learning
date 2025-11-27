@@ -222,7 +222,7 @@ function afficherRitual() {
     const dateActuelle = aujourdhui.getDate();
     const moisActuel = mois[aujourdhui.getMonth()];
 
-    texteDialogue.textContent = "Faisons notre rituel quotidien : Quelle est la date aujourd'hui ?";
+    texteDialogue.textContent = "Commençons par la date d'aujourd'hui !";
     zoneExercice.style.display = 'block';
 
     let suffixeHTML = '<option value="">-</option>';
@@ -255,12 +255,44 @@ function afficherRitual() {
                         <select id="selectSuffixe">${suffixeHTML}</select>
                         <select id="selectMois">${moisHTML}</select>
                     </div>
-                    <button class="bouton-valider-date" onclick="verifierDate()">Check!</button>
                     <div id="messageDate"></div>
+
+                    <div class="meteo-container">
+                        <div class="meteo-titre">What's the weather like today ?</div>
+                        <div class="meteo-options">
+                            <!-- Ordre demandé: sunny, cloudy, rainy, stormy, snowy -->
+                            <div class="meteo-option" role="button" tabindex="0" onclick="selectionnerMeteo(this)" onkeydown="if(event.key==='Enter'||event.key===' '){selectionnerMeteo(this)}">
+                                <img src="assets/sunny.png" alt="Sunny">
+                                <span class="meteo-label">Sunny</span>
+                            </div>
+                            <div class="meteo-option" role="button" tabindex="0" onclick="selectionnerMeteo(this)" onkeydown="if(event.key==='Enter'||event.key===' '){selectionnerMeteo(this)}">
+                                <img src="assets/cloudy.png" alt="Cloudy">
+                                <span class="meteo-label">Cloudy</span>
+                            </div>
+                            <div class="meteo-option" role="button" tabindex="0" onclick="selectionnerMeteo(this)" onkeydown="if(event.key==='Enter'||event.key===' '){selectionnerMeteo(this)}">
+                                <img src="assets/rainy.png" alt="Rainy">
+                                <span class="meteo-label">Rainy</span>
+                            </div>
+                            <div class="meteo-option" role="button" tabindex="0" onclick="selectionnerMeteo(this)" onkeydown="if(event.key==='Enter'||event.key===' '){selectionnerMeteo(this)}">
+                                <img src="assets/stormy.png" alt="Stormy">
+                                <span class="meteo-label">Stormy</span>
+                            </div>
+                            <div class="meteo-option" role="button" tabindex="0" onclick="selectionnerMeteo(this)" onkeydown="if(event.key==='Enter'||event.key===' '){selectionnerMeteo(this)}">
+                                <img src="assets/snowy.png" alt="Snowy">
+                                <span class="meteo-label">Snowy</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="bouton-valider-date" onclick="verifierDate()">Vérifier !</button>
                 </div>
             `;
 
     btnContinuer.style.display = 'none';
+    // afficher une bulle flottante pour le personnage (sans déplacer le contenu centré)
+    removeSpeakerFloat();
+    const nom = document.getElementById('nomPersonnage') ? document.getElementById('nomPersonnage').textContent : 'Monsieur chat';
+    createSpeakerFloat(nom, texteDialogue.textContent);
     container.style.display = 'flex';
 
     window.dateActuelle = {
@@ -294,6 +326,12 @@ function verifierDate() {
     const moisChoisi = selectMois.value;
 
     let toutCorrect = true;
+
+    // Vérifier que la météo a été sélectionnée
+    if (!window.selectedMeteo) {
+        messageDiv.innerHTML = '<div class="message-date" style="background: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%); color: white;">⚠️ Please select the weather before checking!</div>';
+        toutCorrect = false;
+    }
 
     selectJour.classList.remove('correct', 'incorrect');
     selectDate.classList.remove('correct', 'incorrect');
@@ -329,13 +367,13 @@ function verifierDate() {
     }
 
     if (toutCorrect) {
-        messageDiv.innerHTML = '<div class="message-date" style="background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white;">🎉 Perfect! That\'s the correct date!</div>';
+        messageDiv.innerHTML = '<div class="message-date" style="background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white;">🎉 Super ! C\'est la bonne date !</div>';
         exerciceTermine = true;
         setTimeout(() => {
             document.getElementById('btnContinuer').style.display = 'block';
         }, 800);
     } else {
-        messageDiv.innerHTML = '<div class="message-date" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white;">❌ Something is wrong, try again!</div>';
+        messageDiv.innerHTML = '<div class="message-date" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white;">❌ Quelque chose ne va pas, essaye encore !</div>';
     }
 }
 
@@ -352,16 +390,36 @@ function afficherDialogue(niveauId) {
         zoneExercice.style.display = 'none';
         btnContinuer.style.display = 'block';
         exerciceTermine = true;
+        // cours -> retirer bulle flottante et réafficher le chat gauche
+        removeSpeakerFloat();
     } else if (niveau.type === 'exercice') {
-        texteDialogue.textContent = `Exercice ${niveau.nom}. Contenu à venir...`;
-        zoneExercice.style.display = 'none';
-        btnContinuer.style.display = 'block';
-        exerciceTermine = true;
+        // For specific exercises we render their content; default fallback otherwise
+        if (niveauId === 2) {
+            texteDialogue.textContent = `Relie chaque mot en anglais à la bonne image. Clique sur le point qui correspond au mot, puis sur celui de l'image.`;
+            // render exercise 1.1
+            afficherExercice1_1();
+            exerciceTermine = false;
+            // show speaker instructions
+            removeSpeakerFloat();
+            const nomEx = document.getElementById('nomPersonnage') ? document.getElementById('nomPersonnage').textContent : 'Monsieur chat';
+            createSpeakerFloat(nomEx, texteDialogue.textContent);
+        } else {
+            texteDialogue.textContent = `Exercice ${niveau.nom}. Contenu à venir...`;
+            zoneExercice.style.display = 'none';
+            btnContinuer.style.display = 'block';
+            exerciceTermine = true;
+            // exercices -> afficher bulle flottante
+            removeSpeakerFloat();
+            const nomEx = document.getElementById('nomPersonnage') ? document.getElementById('nomPersonnage').textContent : 'Monsieur chat';
+            createSpeakerFloat(nomEx, texteDialogue.textContent);
+        }
     } else if (niveau.type === 'evaluation') {
         texteDialogue.textContent = "Évaluation finale à venir...";
         zoneExercice.style.display = 'none';
         btnContinuer.style.display = 'block';
         exerciceTermine = true;
+        // évaluation -> retirer bulle flottante et réafficher le chat gauche
+        removeSpeakerFloat();
     }
 
     container.style.display = 'flex';
@@ -373,10 +431,12 @@ document.getElementById('btnContinuer').addEventListener('click', () => {
 
     if (exerciceTermine) {
         container.style.display = 'none';
+        removeSpeakerFloat();
         btnContinuer.textContent = 'Continue →';
         completerNiveau(niveauActuel);
     } else {
         container.style.display = 'none';
+        removeSpeakerFloat();
     }
 });
 
@@ -388,5 +448,310 @@ function completerNiveau(id) {
 }
 
 function fermerDialogue() {
-    document.getElementById('dialogueContainer').style.display = 'none';
+    const container = document.getElementById('dialogueContainer');
+    container.style.display = 'none';
+    removeSpeakerFloat();
+}
+
+// Crée une bulle flottante avec le personnage et le texte (en bas à gauche)
+function createSpeakerFloat(nom, texte) {
+    removeSpeakerFloat();
+    const existing = document.querySelector('.speaker-float');
+    if (existing) return;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'speaker-float';
+
+    // Cloner l'image du personnage si possible
+    const originalPerso = document.getElementById('personnageDialogue');
+    let persoClone;
+    if (originalPerso) {
+        persoClone = originalPerso.cloneNode(true);
+        // éviter les ids dupliqués
+        persoClone.removeAttribute('id');
+    } else {
+        persoClone = document.createElement('div');
+        persoClone.className = 'personnage-dialogue';
+    }
+
+    // Bulle contenant nom et texte
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    const nomEl = document.createElement('div');
+    nomEl.className = 'nom-personnage';
+    nomEl.textContent = nom || 'Monsieur chat';
+    const texteEl = document.createElement('div');
+    texteEl.className = 'texte-dialogue';
+    texteEl.textContent = texte || '';
+    bubble.appendChild(nomEl);
+    bubble.appendChild(texteEl);
+
+    wrapper.appendChild(persoClone);
+    wrapper.appendChild(bubble);
+
+    document.body.appendChild(wrapper);
+    // masquer la partie nom/texte dans la boîte principale pour éviter duplication
+    const mainBox = document.querySelector('.dialogue-box');
+    if (mainBox) mainBox.classList.add('hide-speaker');
+    // masquer le chat gauche dans la boîte principale
+    const container = document.getElementById('dialogueContainer');
+    if (container) container.classList.add('hide-left-chat');
+
+    // animate in (slide + fade)
+    requestAnimationFrame(() => {
+        wrapper.classList.add('show');
+    });
+}
+
+function removeSpeakerFloat() {
+    const el = document.querySelector('.speaker-float');
+    const container = document.getElementById('dialogueContainer');
+    // animate out then remove
+    if (el) {
+        // remove 'show' to trigger transition out
+        el.classList.remove('show');
+        const duration = 280; // match CSS transition (ms)
+        setTimeout(() => {
+            if (el && el.parentNode) el.parentNode.removeChild(el);
+        }, duration + 20);
+    }
+    // retirer la classe qui cache le nom/texte dans la boîte principale
+    const mainBox = document.querySelector('.dialogue-box');
+    if (mainBox) mainBox.classList.remove('hide-speaker');
+    // retirer la classe qui cache le chat gauche
+    if (container) container.classList.remove('hide-left-chat');
+}
+
+// Permet de sélectionner visuellement une option météo (clique ou clavier)
+function selectionnerMeteo(el) {
+    if (!el) return;
+    // Trouver toutes les options présentes dans la boîte courante
+    const parent = el.closest('.meteo-options');
+    if (!parent) return;
+
+    const options = parent.querySelectorAll('.meteo-option');
+    options.forEach(opt => {
+        opt.classList.remove('selected');
+        opt.setAttribute('aria-pressed', 'false');
+    });
+
+    // Marquer l'option cliquée comme sélectionnée
+    el.classList.add('selected');
+    el.setAttribute('aria-pressed', 'true');
+
+    // Sauvegarder la sélection globalement si nécessaire
+    const label = el.querySelector('.meteo-label');
+    window.selectedMeteo = label ? label.textContent.trim() : null;
+}
+
+// Exercice 1.1 - matching words to images
+function afficherExercice1_1() {
+    const zoneExercice = document.getElementById('zoneExercice');
+    const btnContinuer = document.getElementById('btnContinuer');
+    zoneExercice.style.display = 'block';
+    btnContinuer.style.display = 'none';
+
+    const pairs = [
+        { key: 'eat', word: 'Eat', img: 'assets/eat.png' },
+        { key: 'sleep', word: 'Sleep', img: 'assets/sleep.png' },
+        { key: 'work', word: 'Work', img: 'assets/work.png' },
+        { key: 'wake', word: 'Wake up', img: 'assets/wake.png' },
+        { key: 'play', word: 'Play', img: 'assets/play.png' },
+        { key: 'brush', word: 'Brush my teeth', img: 'assets/brush.png' }
+    ];
+
+    function shuffle(a) { return a.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(a=>a[1]); }
+
+    // split into left (3 images), right (3 images), and words (6)
+    const shuffledPairs = shuffle(pairs.slice());
+    const leftImages = shuffledPairs.slice(0,3);
+    const rightImages = shuffledPairs.slice(3,6);
+    const words = shuffle(pairs.slice());
+
+    // render 3-column layout
+    zoneExercice.innerHTML = `
+        <svg class="match-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="match-container">
+            <div class="match-left"></div>
+            <div class="match-center"></div>
+            <div class="match-right"></div>
+        </div>
+    `;
+
+    const svg = zoneExercice.querySelector('.match-svg');
+    const leftCol = zoneExercice.querySelector('.match-left');
+    const centerCol = zoneExercice.querySelector('.match-center');
+    const rightCol = zoneExercice.querySelector('.match-right');
+
+    // helper to create image block (no text under images)
+    function createImageBlock(p, side) {
+        const d = document.createElement('div');
+        d.className = 'match-image';
+        d.setAttribute('data-key', p.key);
+        d.tabIndex = 0;
+        const img = document.createElement('img');
+        img.src = p.img;
+        img.alt = p.key;
+        d.appendChild(img);
+        // connector point
+        const point = document.createElement('span');
+        point.className = 'connector-point ' + (side==='left' ? 'point-right' : 'point-left');
+        point.setAttribute('data-key', p.key);
+        point.setAttribute('data-role', 'image');
+        d.appendChild(point);
+        return d;
+    }
+
+    // create word block with left and right points
+    function createWordBlock(p) {
+        const d = document.createElement('div');
+        d.className = 'match-word';
+        d.setAttribute('data-key', p.key);
+        d.tabIndex = 0;
+        const leftPoint = document.createElement('span');
+        leftPoint.className = 'connector-point point-left';
+        leftPoint.setAttribute('data-key', p.key);
+        leftPoint.setAttribute('data-role', 'word');
+        const txt = document.createElement('div');
+        txt.className = 'word-text';
+        txt.textContent = p.word;
+        const rightPoint = document.createElement('span');
+        rightPoint.className = 'connector-point point-right';
+        rightPoint.setAttribute('data-key', p.key);
+        rightPoint.setAttribute('data-role', 'word');
+        d.appendChild(leftPoint);
+        d.appendChild(txt);
+        d.appendChild(rightPoint);
+        return d;
+    }
+
+    // render
+    leftImages.forEach(p => leftCol.appendChild(createImageBlock(p, 'left')));
+    words.forEach(p => centerCol.appendChild(createWordBlock(p)));
+    rightImages.forEach(p => rightCol.appendChild(createImageBlock(p, 'right')));
+
+    // connection logic
+    let startPoint = null; // DOM element of connector-point
+    let matchedKeys = new Set();
+    const total = pairs.length;
+
+    function getPointCenter(el) {
+        const r = el.getBoundingClientRect();
+        const svgR = svg.getBoundingClientRect();
+        const x = (r.left + r.right) / 2 - svgR.left;
+        const y = (r.top + r.bottom) / 2 - svgR.top;
+        return { x, y };
+    }
+
+    function drawLine(fromEl, toEl, correct) {
+        const p1 = getPointCenter(fromEl);
+        const p2 = getPointCenter(toEl);
+        const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+        line.setAttribute('x1', p1.x);
+        line.setAttribute('y1', p1.y);
+        line.setAttribute('x2', p2.x);
+        line.setAttribute('y2', p2.y);
+        line.classList.add('match-line');
+        line.classList.add(correct ? 'correct' : 'wrong');
+        svg.appendChild(line);
+        return line;
+    }
+
+    function connectPoints(start, end) {
+        // ensure one is word and one is image
+        if (!start || !end) return;
+        const startRole = start.getAttribute('data-role');
+        const endRole = end.getAttribute('data-role');
+        if (startRole === endRole) return; // invalid
+
+        const wordEl = startRole === 'word' ? start : end; // point element
+        const imageEl = startRole === 'image' ? start : end;
+        const wordKey = wordEl.getAttribute('data-key');
+        const imageKey = imageEl.getAttribute('data-key');
+
+        // prevent reconnecting already matched
+        if (matchedKeys.has(wordKey) || matchedKeys.has(imageKey)) return;
+
+        const correct = wordKey === imageKey;
+        const line = drawLine(start, end, correct);
+
+        if (correct) {
+            // mark matched visually and disable points
+            matchedKeys.add(wordKey);
+            // find parent word and image blocks
+            const wordBlock = centerCol.querySelector(`.match-word[data-key="${wordKey}"]`);
+            const imgBlock = zoneExercice.querySelector(`.match-image[data-key="${imageKey}"]`);
+            if (wordBlock) wordBlock.classList.add('matched');
+            if (imgBlock) imgBlock.classList.add('matched');
+            // disable points for these keys
+            Array.from(zoneExercice.querySelectorAll(`.connector-point[data-key="${wordKey}"]`)).forEach(pt=>pt.classList.add('disabled'));
+            Array.from(zoneExercice.querySelectorAll(`.connector-point[data-key="${imageKey}"]`)).forEach(pt=>pt.classList.add('disabled'));
+
+            // keep the line visible and colored green
+            line.classList.add('correct');
+            // increment and check completion
+            if (matchedKeys.size === total) {
+                exerciceTermine = true;
+                setTimeout(()=>{ btnContinuer.style.display = 'block'; }, 400);
+                const msg = zoneExercice.querySelector('#messageMatch');
+                if (!msg) {
+                    const m = document.createElement('div');
+                    m.id = 'messageMatch';
+                    m.className = 'message-date';
+                    m.style.background = 'linear-gradient(135deg,#2ecc71 0%,#27ae60 100%)';
+                    m.style.color = 'white';
+                    m.textContent = '🎉 Bien joué ! Tu as bien tout aligné !';
+                    zoneExercice.prepend(m);
+                }
+            }
+        } else {
+            // wrong: animate red then remove line
+            line.classList.add('wrong');
+            // brief shake on both parent blocks
+            const wordBlock = centerCol.querySelector(`.match-word[data-key="${wordKey}"]`);
+            const imgBlock = zoneExercice.querySelector(`.match-image[data-key="${imageKey}"]`);
+            if (wordBlock) wordBlock.classList.add('match-wrong');
+            if (imgBlock) imgBlock.classList.add('match-wrong');
+            setTimeout(()=>{
+                if (wordBlock) wordBlock.classList.remove('match-wrong');
+                if (imgBlock) imgBlock.classList.remove('match-wrong');
+            }, 600);
+            setTimeout(()=>{ if (line && line.parentNode) line.parentNode.removeChild(line); }, 700);
+        }
+    }
+
+    // wire points
+    zoneExercice.querySelectorAll('.connector-point').forEach(pt => {
+        pt.addEventListener('click', (e) => {
+            if (pt.classList.contains('disabled')) return;
+            // if no start selected and this is a word point -> select
+            const role = pt.getAttribute('data-role');
+            if (!startPoint) {
+                if (role !== 'word') {
+                    // signal: must select a word point first
+                    pt.classList.add('match-wrong');
+                    setTimeout(()=>pt.classList.remove('match-wrong'), 350);
+                    return;
+                }
+                startPoint = pt;
+                pt.classList.add('selected');
+                return;
+            }
+            // if clicking same point -> deselect
+            if (startPoint === pt) { startPoint.classList.remove('selected'); startPoint = null; return; }
+            // else attempt to connect startPoint -> pt
+            connectPoints(startPoint, pt);
+            if (startPoint) startPoint.classList.remove('selected');
+            startPoint = null;
+        });
+        pt.addEventListener('keydown', (e) => { if (e.key==='Enter'||e.key===' ') { e.preventDefault(); pt.click(); } });
+    });
+
+    // on resize, update existing lines positions (in case of window resize)
+    window.addEventListener('resize', () => {
+        const lines = svg.querySelectorAll('line');
+        lines.forEach(line => {
+            const x1 = line.getAttribute('x1'); // keep as-is; more advanced updating would store endpoints
+        });
+    });
 }
