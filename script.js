@@ -26,28 +26,73 @@ let modeAdmin = false;
 let konamiIndex = 0;
 const KONAMI_CODE = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
 
+/* ============================================================
+   ÉCRAN DE CHARGEMENT
+   ============================================================ */
+window.addEventListener('load', () => {
+    const loadingScreen = document.getElementById('loadingScreen');
+    const loadingBar = document.getElementById('loadingBar');
+    const loadingBarContainer = document.querySelector('.loading-bar-container');
+    const loadingText = document.querySelector('.loading-text');
+    const loadingLogo = document.querySelector('.loading-logo');
+    const headerLogo = document.getElementById('headerLogo');
+    
+    let progress = 0;
+    const duration = 2000; // 2 secondes
+    const interval = 20; // Update every 20ms
+    const increment = 100 / (duration / interval);
+    
+    const loadingInterval = setInterval(() => {
+        progress += increment;
+        if (progress >= 100) {
+            progress = 100;
+            loadingBar.style.width = '100%';
+            clearInterval(loadingInterval);
+            
+            // Cacher la barre et le texte
+            setTimeout(() => {
+                loadingBarContainer.classList.add('hidden');
+                loadingText.classList.add('hidden');
+                
+                // Animer le logo vers le haut
+                setTimeout(() => {
+                    loadingLogo.classList.add('moving');
+                    
+                    // Une fois l'animation terminée, cacher l'écran et montrer le header logo
+                    setTimeout(() => {
+                        headerLogo.classList.add('visible');
+                        loadingScreen.classList.add('hidden');
+                    }, 800);
+                }, 300);
+            }, 200);
+        } else {
+            loadingBar.style.width = progress + '%';
+        }
+    }, interval);
+});
+
 // Configuration des niveaux du jeu
 const niveaux = [
     // Ritual d'ouverture
     { id: 0, type: 'ritual', nom: 'Ritual', emoji: '📅' },
     
     // Bloc 1 : Lesson + Exercices
-    { id: 1, type: 'cours', nom: 'Lesson 1', emoji: '📚' },
+    { id: 1, type: 'cours', nom: 'Lesson 1', emoji: '📖' },
     { id: 2, type: 'exercice', nom: 'Exercise 1.1', emoji: '✏️' },
     { id: 3, type: 'exercice', nom: 'Exercise 1.2', emoji: '✏️' },
     { id: 4, type: 'exercice', nom: 'Exercise 1.3', emoji: '✏️' },
     
     // Bloc 2
     { id: 5, type: 'cours', nom: 'Lesson 2', emoji: '📖' },
-    { id: 6, type: 'exercice', nom: 'Exercise 2.1', emoji: '📝' },
-    { id: 7, type: 'exercice', nom: 'Exercise 2.2', emoji: '📝' },
-    { id: 8, type: 'exercice', nom: 'Exercise 2.3', emoji: '📝' },
+    { id: 6, type: 'exercice', nom: 'Exercise 2.1', emoji: '✏️' },
+    { id: 7, type: 'exercice', nom: 'Exercise 2.2', emoji: '✏️' },
+    { id: 8, type: 'exercice', nom: 'Exercise 2.3', emoji: '✏️' },
     
     // Bloc 3
-    { id: 9, type: 'cours', nom: 'Lesson 3', emoji: '📕' },
-    { id: 10, type: 'exercice', nom: 'Exercise 3.1', emoji: '✍️' },
-    { id: 11, type: 'exercice', nom: 'Exercise 3.2', emoji: '✍️' },
-    { id: 12, type: 'exercice', nom: 'Exercise 3.3', emoji: '✍️' },
+    { id: 9, type: 'cours', nom: 'Lesson 3', emoji: '📖' },
+    { id: 10, type: 'exercice', nom: 'Exercise 3.1', emoji: '✏️' },
+    { id: 11, type: 'exercice', nom: 'Exercise 3.2', emoji: '✏️' },
+    { id: 12, type: 'exercice', nom: 'Exercise 3.3', emoji: '✏️' },
     
     // Évaluation finale
     { id: 13, type: 'evaluation', nom: 'Evaluation', emoji: '🏆' }
@@ -511,11 +556,11 @@ function afficherDialogue(niveauId) {
                             <div class="example-comparison">
                                 <div class="example-item">
                                     <div class="country">🌅</div>
-                                    <div class="time">Daily life</div>
+                                    <div class="time">Vie quotidienne</div>
                                 </div>
                                 <div class="example-item">
                                     <div class="country">🕐</div>
-                                    <div class="time">AM / PM</div>
+                                    <div class="time">Heures anglaises</div>
                                 </div>
                             </div>
                         </div>
@@ -571,6 +616,13 @@ function afficherDialogue(niveauId) {
                 // Exercice 2.2 : Audio AM/PM
                 texteDialogue.textContent = `Augmente le son de ton appareil numérique et sois attentif ! Voyons ensemble si tu as compris la différence entre heure française et heure anglaise. Tu vas entendre des phrases françaises (avec l'heure en français!). Tu as ensuite des cases avec les abréviations AM et PM. À toi de cocher la bonne case en fonction de ce que tu entends en français !`;
                 afficherExercice2_2();
+                exerciceTermine = false;
+                removeSpeakerFloat();
+                createSpeakerFloat('Monsieur Chat', texteDialogue.textContent, 'chat');
+            } else if (niveauId === 8) {
+                // Exercice 2.3 : Frise chronologique
+                texteDialogue.textContent = `Associons les heures anglaises au temps de la journée ! Regarde bien la frise devant toi. Elle est séparée en deux avec un côté AM et un côté PM ! Tu as des petites vignettes avec l'heure anglaise. À toi de placer les heures anglaises au bon endroit sur la frise. Sois le plus précis possible !`;
+                afficherExercice2_3();
                 exerciceTermine = false;
                 removeSpeakerFloat();
                 createSpeakerFloat('Monsieur Chat', texteDialogue.textContent, 'chat');
@@ -1087,13 +1139,13 @@ function afficherExercice1_2() {
     
     // Phrases avec leurs traductions et le verbe attendu
     const phrases = [
-        { english: "I wake up at 7", french: "Je me _ à 7h", answer: "lève" },
-        { english: "I brush my teeth", french: "Je me _ les dents", answer: "brosse" },
-        { english: "I eat my breakfast in the morning", french: "Je _ mon petit-déjeuner le matin", answer: "mange" },
-        { english: "I do my homework after school", french: "Je _ mes devoirs après l'école", answer: "fais" },
-        { english: "I play a game with my friends", french: "Je _ à un jeu avec mes amis", answer: "joue" },
-        { english: "I watch TV with my family", french: "Je _ la télé avec ma famille", answer: "regarde" },
-        { english: "I take a shower after sport", french: "Je _ une douche après le sport", answer: "prends" }
+        { english: "I wake up at 7.", french: "Je me _ à 7h.", answer: "lève" },
+        { english: "I brush my teeth.", french: "Je me _ les dents.", answer: "brosse" },
+        { english: "I eat my breakfast in the morning.", french: "Je _ mon petit-déjeuner le matin.", answer: "mange" },
+        { english: "I do my homework after school.", french: "Je _ mes devoirs après l'école.", answer: "fais" },
+        { english: "I play a game with my friends.", french: "Je _ à un jeu avec mes amis.", answer: "joue" },
+        { english: "I watch TV with my family.", french: "Je _ la télé avec ma famille.", answer: "regarde" },
+        { english: "I take a shower after sport.", french: "Je _ une douche après le sport.", answer: "prends" }
     ];
     
     // Verbes disponibles (mélangés)
@@ -1127,14 +1179,14 @@ function afficherExercice1_2() {
         <div class="fill-labels" id="fillLabels">
             ${labelsHTML}
         </div>
+        <button class="ampm-verify-btn" id="btnVerifierFill">Vérifier ✓</button>
         <div id="messageFill" class="message-match"></div>
     `;
     
     // État de l'exercice
     let selectedLabel = null;
-    const completedGaps = new Set();
-    const total = phrases.length;
     const messageDiv = document.getElementById('messageFill');
+    const labelsContainer = document.getElementById('fillLabels');
     
     // Événements sur les étiquettes
     zoneExercice.querySelectorAll('.fill-label').forEach(label => {
@@ -1161,17 +1213,16 @@ function afficherExercice1_2() {
         gap.addEventListener('click', () => {
             const index = parseInt(gap.dataset.index);
             
-            // Si le trou est déjà correct, ne rien faire
+            // Si le trou est déjà validé correct, ne rien faire
             if (gap.classList.contains('correct')) return;
             
             // Si aucune étiquette sélectionnée, ne rien faire
             if (!selectedLabel) return;
             
             const verb = selectedLabel.dataset.verb;
-            const phrase = phrases[index];
             
-            // Si le trou contient déjà un verbe incorrect, le remettre dans les étiquettes
-            if (gap.textContent && !gap.classList.contains('correct')) {
+            // Si le trou contient déjà un verbe, le remettre dans les étiquettes
+            if (gap.textContent) {
                 const oldVerb = gap.textContent;
                 const oldLabel = zoneExercice.querySelector(`.fill-label[data-verb="${oldVerb}"]`);
                 if (oldLabel) {
@@ -1184,33 +1235,74 @@ function afficherExercice1_2() {
             gap.classList.add('filled');
             gap.classList.remove('wrong');
             
-            // Vérifier si c'est correct
-            if (verb === phrase.answer) {
+            // Marquer l'étiquette comme utilisée
+            selectedLabel.classList.add('used');
+            selectedLabel.classList.remove('selected');
+            selectedLabel = null;
+        });
+    });
+    
+    // Bouton vérifier
+    document.getElementById('btnVerifierFill').addEventListener('click', () => {
+        let toutCorrect = true;
+        let toutRempli = true;
+        
+        zoneExercice.querySelectorAll('.fill-gap').forEach(gap => {
+            // Si déjà validé, passer
+            if (gap.classList.contains('correct')) return;
+            
+            const index = parseInt(gap.dataset.index);
+            const answer = phrases[index].answer;
+            const verb = gap.textContent;
+            
+            // Retirer les classes d'erreur
+            gap.classList.remove('wrong');
+            gap.closest('.fill-phrase').classList.remove('error');
+            
+            if (!verb) {
+                // Pas de verbe placé
+                toutRempli = false;
+                toutCorrect = false;
+                gap.closest('.fill-phrase').classList.add('error');
+            } else if (verb === answer) {
+                // Bonne réponse
                 gap.classList.add('correct');
-                selectedLabel.classList.add('used');
-                selectedLabel.classList.remove('selected');
-                selectedLabel = null;
-                completedGaps.add(index);
-                
-                // Vérifier si tout est complété
-                if (completedGaps.size === total) {
-                    exerciceTermine = true;
-                    messageDiv.innerHTML = creerMessageFeedback('success', '🎉 Perfect!');
-                    setTimeout(() => btnContinuer.style.display = 'block', 400);
-                }
             } else {
                 // Mauvaise réponse
                 gap.classList.add('wrong');
-                selectedLabel.classList.remove('selected');
-                selectedLabel = null;
+                gap.closest('.fill-phrase').classList.add('error');
+                toutCorrect = false;
                 
-                // Retirer le verbe après l'animation
+                // Remettre le verbe dans les étiquettes après l'animation
+                const oldLabel = zoneExercice.querySelector(`.fill-label[data-verb="${verb}"]`);
                 setTimeout(() => {
                     gap.textContent = '';
                     gap.classList.remove('filled', 'wrong');
+                    gap.closest('.fill-phrase')?.classList.remove('error');
+                    if (oldLabel) {
+                        oldLabel.classList.remove('used');
+                    }
                 }, 600);
             }
         });
+        
+        // Vérifier si tout est validé
+        const totalGaps = zoneExercice.querySelectorAll('.fill-gap').length;
+        const correctGaps = zoneExercice.querySelectorAll('.fill-gap.correct').length;
+        
+        if (!toutRempli) {
+            messageDiv.innerHTML = creerMessageFeedback('warning', '⚠️ Remplis tous les trous avant de vérifier !');
+        } else if (correctGaps === totalGaps) {
+            messageDiv.innerHTML = creerMessageFeedback('success', '🎉 Perfect!');
+            exerciceTermine = true;
+            setTimeout(() => btnContinuer.style.display = 'block', 400);
+        } else if (toutCorrect) {
+            messageDiv.innerHTML = creerMessageFeedback('success', '🎉 Perfect!');
+            exerciceTermine = true;
+            setTimeout(() => btnContinuer.style.display = 'block', 400);
+        } else {
+            messageDiv.innerHTML = creerMessageFeedback('error', '❌ Certaines réponses sont incorrectes, essaye encore !');
+        }
     });
 }
 
@@ -1264,6 +1356,9 @@ function afficherExercice1_3() {
         </div>
         <div id="messageAudioMatch" class="message-match"></div>
     `;
+    
+    // Fixer la hauteur de la zone exercice pour éviter le redimensionnement
+    zoneExercice.style.minHeight = zoneExercice.offsetHeight + 'px';
     
     const messageDiv = document.getElementById('messageAudioMatch');
     const dragContainer = document.getElementById('dragImagesContainer');
@@ -1704,6 +1799,192 @@ function afficherExercice2_2() {
     });
 }
 
+/**
+ * Exercice 2.3 : Frise chronologique AM/PM
+ */
+function afficherExercice2_3() {
+    const zoneExercice = document.getElementById('zoneExercice');
+    const btnContinuer = document.getElementById('btnContinuer');
+    
+    zoneExercice.style.display = 'block';
+    btnContinuer.style.display = 'none';
+    
+    // Heures à placer avec leur côté correct
+    const heures = [
+        { time: '1:00 PM', side: 'pm' },
+        { time: '8:00 AM', side: 'am' },
+        { time: '8:00 PM', side: 'pm' },
+        { time: '3:00 PM', side: 'pm' },
+        { time: '7:00 AM', side: 'am' },
+        { time: '7:00 PM', side: 'pm' },
+        { time: '9:00 AM', side: 'am' },
+        { time: '9:00 PM', side: 'pm' },
+        { time: '10:00 AM', side: 'am' },
+        { time: '12:00 PM', side: 'pm' }
+    ];
+    
+    // Mélanger les heures
+    const shuffledHeures = shuffle([...heures]);
+    
+    // Créer les étiquettes d'heures
+    let hoursHTML = shuffledHeures.map(h => `
+        <div class="frise-hour" draggable="true" data-time="${h.time}" data-answer="${h.side}">
+            ${h.time}
+        </div>
+    `).join('');
+    
+    zoneExercice.innerHTML = `
+        <div class="frise-container">
+            <div class="frise-timeline">
+                <div class="frise-side frise-side-am" data-side="am">
+                    <span class="frise-icon frise-icon-am">☀️</span>
+                </div>
+                <div class="frise-separator"></div>
+                <div class="frise-side frise-side-pm" data-side="pm">
+                    <span class="frise-icon frise-icon-pm">🌙</span>
+                </div>
+            </div>
+            <div class="frise-hours-container" id="friseHoursContainer">
+                ${hoursHTML}
+            </div>
+        </div>
+        <button class="ampm-verify-btn" id="btnVerifierFrise">Vérifier ✓</button>
+        <div id="messageFrise" class="message-match"></div>
+    `;
+    
+    const messageDiv = document.getElementById('messageFrise');
+    const hoursContainer = document.getElementById('friseHoursContainer');
+    
+    // Drag & Drop
+    let draggedElement = null;
+    
+    // Événements sur les heures draggables
+    zoneExercice.querySelectorAll('.frise-hour').forEach(hour => {
+        hour.addEventListener('dragstart', (e) => {
+            // Ne pas permettre de drag si correct
+            if (hour.classList.contains('correct')) {
+                e.preventDefault();
+                return;
+            }
+            
+            draggedElement = hour;
+            hour.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        });
+        
+        hour.addEventListener('dragend', () => {
+            if (draggedElement) {
+                draggedElement.classList.remove('dragging');
+                draggedElement = null;
+            }
+            // Retirer tous les drag-over
+            zoneExercice.querySelectorAll('.frise-side').forEach(side => {
+                side.classList.remove('drag-over');
+            });
+        });
+    });
+    
+    // Événements sur les côtés de la frise (zones de drop)
+    zoneExercice.querySelectorAll('.frise-side').forEach(side => {
+        side.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            side.classList.add('drag-over');
+        });
+        
+        side.addEventListener('dragleave', () => {
+            side.classList.remove('drag-over');
+        });
+        
+        side.addEventListener('drop', (e) => {
+            e.preventDefault();
+            side.classList.remove('drag-over');
+            
+            if (!draggedElement) return;
+            
+            // Si l'heure est déjà correcte, ne rien faire
+            if (draggedElement.classList.contains('correct')) return;
+            
+            // Retirer les classes d'erreur précédentes
+            draggedElement.classList.remove('wrong');
+            
+            // Placer l'heure dans ce côté
+            side.appendChild(draggedElement);
+            
+            draggedElement.classList.remove('dragging');
+            draggedElement = null;
+        });
+    });
+    
+    // Permettre de remettre une heure dans le conteneur
+    hoursContainer.addEventListener('dragover', (e) => {
+        e.preventDefault();
+    });
+    
+    hoursContainer.addEventListener('drop', (e) => {
+        e.preventDefault();
+        if (draggedElement && !draggedElement.classList.contains('correct')) {
+            draggedElement.classList.remove('wrong');
+            hoursContainer.appendChild(draggedElement);
+            draggedElement.classList.remove('dragging');
+            draggedElement = null;
+        }
+    });
+    
+    // Bouton vérifier
+    document.getElementById('btnVerifierFrise').addEventListener('click', () => {
+        let toutCorrect = true;
+        let toutPlace = true;
+        
+        zoneExercice.querySelectorAll('.frise-hour').forEach(hour => {
+            // Si déjà correct, passer
+            if (hour.classList.contains('correct')) return;
+            
+            const answer = hour.dataset.answer;
+            const parentSide = hour.closest('.frise-side');
+            
+            // Retirer les classes d'erreur
+            hour.classList.remove('wrong');
+            
+            if (!parentSide) {
+                // Pas encore placé
+                toutPlace = false;
+                toutCorrect = false;
+            } else if (parentSide.dataset.side === answer) {
+                // Bonne réponse
+                hour.classList.add('correct');
+            } else {
+                // Mauvaise réponse
+                hour.classList.add('wrong');
+                toutCorrect = false;
+                
+                // Remettre dans le conteneur après l'animation
+                setTimeout(() => {
+                    hour.classList.remove('wrong');
+                    hoursContainer.appendChild(hour);
+                }, 600);
+            }
+        });
+        
+        // Vérifier si tout est correct
+        const totalHours = zoneExercice.querySelectorAll('.frise-hour').length;
+        const correctHours = zoneExercice.querySelectorAll('.frise-hour.correct').length;
+        
+        if (!toutPlace) {
+            messageDiv.innerHTML = creerMessageFeedback('warning', '⚠️ Place toutes les heures sur la frise !');
+        } else if (correctHours === totalHours) {
+            messageDiv.innerHTML = creerMessageFeedback('success', '🎉 Perfect!');
+            exerciceTermine = true;
+            setTimeout(() => btnContinuer.style.display = 'block', 400);
+        } else if (toutCorrect) {
+            messageDiv.innerHTML = creerMessageFeedback('success', '🎉 Perfect!');
+            exerciceTermine = true;
+            setTimeout(() => btnContinuer.style.display = 'block', 400);
+        } else {
+            messageDiv.innerHTML = creerMessageFeedback('error', '❌ Certaines heures sont mal placées, essaye encore !');
+        }
+    });
+}
+
 /* ============================================================
    7. FONCTIONS UTILITAIRES
    ============================================================ */
@@ -1835,14 +2116,20 @@ function typeWriter(element, texte, vitesse = 30) {
  * Supprime la bulle flottante du personnage
  */
 function removeSpeakerFloat() {
-    const el = document.querySelector('.speaker-float');
-    
-    if (el) {
+    // Supprimer tous les speaker-float (sauf celui de l'accueil)
+    document.querySelectorAll('.speaker-float:not(.speaker-accueil)').forEach(el => {
         el.classList.remove('show');
         setTimeout(() => el.remove(), 300);
-    }
+    });
     
     // Réafficher les éléments masqués
-    document.querySelector('.dialogue-box')?.classList.remove('hide-speaker');
-    document.getElementById('dialogueContainer')?.classList.remove('hide-left-chat');
+    const dialogueBox = document.querySelector('.dialogue-box');
+    const dialogueContainer = document.getElementById('dialogueContainer');
+    
+    if (dialogueBox) {
+        dialogueBox.classList.remove('hide-speaker');
+    }
+    if (dialogueContainer) {
+        dialogueContainer.classList.remove('hide-left-chat');
+    }
 }
