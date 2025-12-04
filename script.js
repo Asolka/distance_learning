@@ -21,6 +21,11 @@ let niveauxCompletes = [];
 let niveauActuel = 0;
 let exerciceTermine = false;
 
+// Mode admin (débloque tout)
+let modeAdmin = false;
+let konamiIndex = 0;
+const KONAMI_CODE = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+
 // Configuration des niveaux du jeu
 const niveaux = [
     // Ritual d'ouverture
@@ -74,6 +79,26 @@ inputPrenom.addEventListener('keypress', (e) => {
 
 // Clic sur le bouton "Play!"
 btnCommencer.addEventListener('click', commencerJeu);
+
+// Initialiser le speaker de la page d'accueil
+document.addEventListener('DOMContentLoaded', () => {
+    const texteAccueil = document.getElementById('texteAccueil');
+    const toggleAccueil = document.getElementById('toggleAccueil');
+    const bubbleAccueil = document.getElementById('bubbleAccueil');
+    
+    if (texteAccueil) {
+        const message = "Hello, Welcome! Passons du temps ensemble pour une leçon d'anglais, tu verras ce sera amusant ! What is your name ?";
+        typeWriter(texteAccueil, message);
+    }
+    
+    if (toggleAccueil && bubbleAccueil) {
+        toggleAccueil.addEventListener('click', () => {
+            bubbleAccueil.classList.toggle('minimized');
+            toggleAccueil.textContent = bubbleAccueil.classList.contains('minimized') ? '+' : '-';
+            toggleAccueil.title = bubbleAccueil.classList.contains('minimized') ? 'Ouvrir' : 'Reduire';
+        });
+    }
+});
 
 /**
  * Démarre le jeu : cache l'accueil, affiche la carte de progression
@@ -239,6 +264,90 @@ function dessinerChemins() {
 window.addEventListener('resize', dessinerChemins);
 
 /* ============================================================
+   SYSTÈME ADMIN (Code Konami : ↑↑↓↓←→←→BA)
+   ============================================================ */
+
+// Écouter le code Konami
+document.addEventListener('keydown', (e) => {
+    if (e.key === KONAMI_CODE[konamiIndex]) {
+        konamiIndex++;
+        if (konamiIndex === KONAMI_CODE.length) {
+            activerModeAdmin();
+            konamiIndex = 0;
+        }
+    } else {
+        konamiIndex = 0;
+    }
+});
+
+/**
+ * Active le mode admin - débloque tous les niveaux
+ */
+function activerModeAdmin() {
+    modeAdmin = true;
+    
+    // Débloquer tous les niveaux
+    niveauxCompletes = niveaux.map(n => n.id);
+    
+    // Afficher notification
+    afficherNotificationAdmin('🔓 Mode Admin activé ! Tous les niveaux débloqués.');
+    
+    // Régénérer les niveaux
+    genererNiveaux();
+}
+
+/**
+ * Désactive le mode admin - remet tout à zéro
+ */
+function desactiverModeAdmin() {
+    modeAdmin = false;
+    niveauxCompletes = [];
+    
+    afficherNotificationAdmin('🔒 Mode Admin désactivé. Progression réinitialisée.');
+    
+    genererNiveaux();
+}
+
+/**
+ * Affiche une notification admin temporaire
+ */
+function afficherNotificationAdmin(message) {
+    // Supprimer notification existante
+    const existante = document.querySelector('.admin-notification');
+    if (existante) existante.remove();
+    
+    const notif = document.createElement('div');
+    notif.className = 'admin-notification';
+    notif.innerHTML = `
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()">✕</button>
+    `;
+    document.body.appendChild(notif);
+    
+    // Animation d'entrée
+    requestAnimationFrame(() => notif.classList.add('show'));
+    
+    // Auto-suppression après 4 secondes
+    setTimeout(() => {
+        notif.classList.remove('show');
+        setTimeout(() => notif.remove(), 300);
+    }, 4000);
+}
+
+/**
+ * Passe directement au niveau suivant (admin only)
+ */
+function skipNiveau() {
+    if (!modeAdmin) return;
+    
+    const container = document.getElementById('dialogueContainer');
+    container.style.display = 'none';
+    removeSpeakerFloat();
+    
+    completerNiveau(niveauActuel);
+}
+
+/* ============================================================
    4. DIALOGUE & NAVIGATION
    ============================================================ */
 
@@ -274,12 +383,29 @@ function afficherDialogue(niveauId) {
     const texteDialogue = document.getElementById('texteDialogue');
     const zoneExercice = document.getElementById('zoneExercice');
     const btnContinuer = document.getElementById('btnContinuer');
+    const dialogueBox = document.querySelector('.dialogue-box');
+    
+    // Ajouter/supprimer bouton skip admin
+    let btnSkip = document.querySelector('.btn-skip-admin');
+    if (modeAdmin) {
+        if (!btnSkip) {
+            btnSkip = document.createElement('button');
+            btnSkip.className = 'btn-skip-admin';
+            btnSkip.textContent = 'Skip ⏭';
+            btnSkip.onclick = skipNiveau;
+            dialogueBox.appendChild(btnSkip);
+        }
+    } else if (btnSkip) {
+        btnSkip.remove();
+    }
     
     const niveau = niveaux.find(n => n.id === niveauId);
     
-    // Déterminer quel personnage utiliser (chat pour bloc 1 : niveaux 1-4)
-    const estBloc1 = niveauId >= 1 && niveauId <= 4;
-    if (estBloc1) {
+    // Déterminer quel personnage utiliser
+    // Chat pour toutes les leçons et exercices, Professeur Panda uniquement pour le ritual
+    const estLeconOuExercice = niveau.type === 'cours' || niveau.type === 'exercice';
+    
+    if (estLeconOuExercice) {
         changerPersonnage('chat');
     } else {
         changerPersonnage('koala');
@@ -288,13 +414,126 @@ function afficherDialogue(niveauId) {
     // Textes et comportements selon le type
     const contenus = {
         cours: () => {
-            // Leçon 1 a du contenu, leçons 2 et 3 sont vides
             if (niveauId === 1) {
-                texteDialogue.textContent = `Parlons de la vie quotidienne ! Qu'est-ce que la vie quotidienne? Il s'agit de toutes les actions que tu fais pendant ta journée. Tu vas apprendre des actions en anglais ! Ce soir en rentrant chez toi, tu pourras raconter à tes parents ta journée en anglais, allons-y !`;
+                // Leçon 1 : La vie quotidienne
+                texteDialogue.textContent = `Parlons de la vie quotidienne !`;
+                zoneExercice.style.display = 'block';
+                zoneExercice.innerHTML = `
+                    <div class="lesson-content">
+                        <h3>🌅 La vie quotidienne</h3>
+                        
+                        <div class="lesson-highlight">
+                            <p>Qu'est-ce que la <strong>vie quotidienne</strong> ?</p>
+                            <p>Il s'agit de toutes les <strong>actions</strong> que tu fais pendant ta journée !</p>
+                        </div>
+                        
+                        <p>Tu vas apprendre à décrire ces actions <strong>en anglais</strong>. Par exemple :</p>
+                        
+                        <div class="lesson-example">
+                            <div class="example-label">Quelques actions du quotidien</div>
+                            <div class="example-comparison">
+                                <div class="example-item">
+                                    <div class="country">🍽️</div>
+                                    <div class="time">Eat</div>
+                                </div>
+                                <div class="example-item">
+                                    <div class="country">😴</div>
+                                    <div class="time">Sleep</div>
+                                </div>
+                                <div class="example-item">
+                                    <div class="country">🎮</div>
+                                    <div class="time">Play</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="lesson-tip">
+                            Ce soir en rentrant chez toi, tu pourras raconter à tes parents ta journée en anglais !
+                        </div>
+                        
+                        <p style="text-align: center; font-size: 1.2em; margin-top: 15px;"><strong>Allons-y ! 🚀</strong></p>
+                    </div>
+                `;
+            } else if (niveauId === 5) {
+                // Leçon 2 : Lire l'heure en anglais
+                texteDialogue.textContent = `Apprenons ensemble à lire l'heure en anglais !`;
+                zoneExercice.style.display = 'block';
+                zoneExercice.innerHTML = `
+                    <div class="lesson-content">
+                        <h3>🕐 L'heure en anglais</h3>
+                        
+                        <div class="lesson-highlight">
+                            <p>En <strong>France</strong>, nous utilisons un système de <strong>24 heures</strong>.</p>
+                            <p>En <strong>Angleterre</strong>, c'est un système de <strong>12 heures</strong> !</p>
+                        </div>
+                        
+                        <p>Les anglais ont une manière différente de parler du matin et de l'après-midi. Ils utilisent les abréviations <strong>AM</strong> et <strong>PM</strong>.</p>
+                        
+                        <div class="lesson-tip">
+                            <strong>AM</strong> = le matin, jusqu'à midi<br>
+                            Astuce : <strong>A</strong>vant-<strong>M</strong>idi
+                        </div>
+                        
+                        <div class="lesson-tip">
+                            <strong>PM</strong> = de midi jusqu'au soir<br>
+                            Astuce : <strong>P</strong>assé-<strong>M</strong>idi
+                        </div>
+                        
+                        <div class="lesson-example">
+                            <div class="example-label">Exemple : 2h de l'après-midi</div>
+                            <div class="example-comparison">
+                                <div class="example-item">
+                                    <div class="country">🇫🇷 France</div>
+                                    <div class="time">14:00</div>
+                                </div>
+                                <div class="example-item">
+                                    <div class="country">🇬🇧 Angleterre</div>
+                                    <div class="time">2:00 PM</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (niveauId === 9) {
+                // Leçon 3 : Mélange vie quotidienne + heures
+                texteDialogue.textContent = `Voici la dernière leçon !`;
+                zoneExercice.style.display = 'block';
+                zoneExercice.innerHTML = `
+                    <div class="lesson-content">
+                        <h3>🎯 Le grand mélange !</h3>
+                        
+                        <div class="lesson-highlight">
+                            <p>Maintenant que tu es un <strong>expert</strong> sur la vie quotidienne et les heures anglaises, faisons un <strong>mélange des deux</strong> !</p>
+                        </div>
+                        
+                        <div class="lesson-example">
+                            <div class="example-label">Ce que tu as appris</div>
+                            <div class="example-comparison">
+                                <div class="example-item">
+                                    <div class="country">🌅</div>
+                                    <div class="time">Daily life</div>
+                                </div>
+                                <div class="example-item">
+                                    <div class="country">🕐</div>
+                                    <div class="time">AM / PM</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <p style="text-align: center; margin-top: 20px;">Je vais te proposer plusieurs exercices mélangeant tout ce que tu viens de voir.</p>
+                        
+                        <div class="lesson-tip">
+                            Tu es prêt ? Montre-moi ce que tu sais faire !
+                        </div>
+                        
+                        <p style="text-align: center; font-size: 1.3em; margin-top: 15px;"><strong>C'est parti ! 🚀</strong></p>
+                    </div>
+                `;
             } else {
+                // Autres leçons : contenu à venir
                 texteDialogue.textContent = `${niveau.nom}. Contenu à venir...`;
+                zoneExercice.style.display = 'none';
             }
-            zoneExercice.style.display = 'none';
             btnContinuer.style.display = 'block';
             exerciceTermine = true;
             removeSpeakerFloat();
@@ -314,6 +553,27 @@ function afficherDialogue(niveauId) {
                 exerciceTermine = false;
                 removeSpeakerFloat();
                 createSpeakerFloat('Monsieur Chat', texteDialogue.textContent, 'chat');
+            } else if (niveauId === 4) {
+                // Exercice 1.3 : drag & drop audio
+                texteDialogue.textContent = `Troisième exercice: écoute les phrases en anglais en cliquant sur le bouton, puis fais glisser la bonne image vers le son correspondant !`;
+                afficherExercice1_3();
+                exerciceTermine = false;
+                removeSpeakerFloat();
+                createSpeakerFloat('Monsieur Chat', texteDialogue.textContent, 'chat');
+            } else if (niveauId === 6) {
+                // Exercice 2.1 : AM/PM soleil/lune
+                texteDialogue.textContent = `Voyons ensemble si tu as bien compris. Voici un premier exercice ! Tu as des heures anglaises et deux images : un soleil (pour le matin), et une lune (pour l'après-midi). Clique sur la bonne image en fonction de l'heure, est-ce le matin ou l'après-midi ?`;
+                afficherExercice2_1();
+                exerciceTermine = false;
+                removeSpeakerFloat();
+                createSpeakerFloat('Monsieur Chat', texteDialogue.textContent, 'chat');
+            } else if (niveauId === 7) {
+                // Exercice 2.2 : Audio AM/PM
+                texteDialogue.textContent = `Augmente le son de ton appareil numérique et sois attentif ! Voyons ensemble si tu as compris la différence entre heure française et heure anglaise. Tu vas entendre des phrases françaises (avec l'heure en français!). Tu as ensuite des cases avec les abréviations AM et PM. À toi de cocher la bonne case en fonction de ce que tu entends en français !`;
+                afficherExercice2_2();
+                exerciceTermine = false;
+                removeSpeakerFloat();
+                createSpeakerFloat('Monsieur Chat', texteDialogue.textContent, 'chat');
             } else {
                 // Exercices non implémentés
                 texteDialogue.textContent = `Exercice ${niveau.nom}. Contenu à venir...`;
@@ -321,9 +581,7 @@ function afficherDialogue(niveauId) {
                 btnContinuer.style.display = 'block';
                 exerciceTermine = true;
                 removeSpeakerFloat();
-                const personnage = estBloc1 ? 'chat' : 'koala';
-                const nom = estBloc1 ? 'Monsieur Chat' : 'Koala';
-                createSpeakerFloat(nom, texteDialogue.textContent, personnage);
+                createSpeakerFloat('Monsieur Chat', texteDialogue.textContent, 'chat');
             }
         },
         evaluation: () => {
@@ -354,6 +612,22 @@ document.getElementById('btnContinuer').addEventListener('click', () => {
     }
 });
 
+// Bouton "Retour" : ferme le dialogue sans valider
+document.getElementById('btnRetour').addEventListener('click', () => {
+    const container = document.getElementById('dialogueContainer');
+    const zoneExercice = document.getElementById('zoneExercice');
+    const btnContinuer = document.getElementById('btnContinuer');
+    
+    container.style.display = 'none';
+    removeSpeakerFloat();
+    
+    // Réinitialiser l'interface
+    zoneExercice.style.display = 'none';
+    zoneExercice.innerHTML = '';
+    btnContinuer.style.display = 'none';
+    btnContinuer.textContent = 'Continue →';
+});
+
 /**
  * Marque un niveau comme terminé
  */
@@ -363,7 +637,7 @@ function completerNiveau(id) {
         
         // Si c'est le ritual (id 0), afficher le message du koala
         if (id === 0) {
-            afficherMessageKoala();
+            afficherMessagePanda();
         } else {
             genererNiveaux();
         }
@@ -373,7 +647,7 @@ function completerNiveau(id) {
 /**
  * Affiche le message central du koala après le ritual
  */
-function afficherMessageKoala() {
+function afficherMessagePanda() {
     const overlay = document.createElement('div');
     overlay.className = 'koala-message-overlay';
     overlay.id = 'koalaMessageOverlay';
@@ -381,10 +655,10 @@ function afficherMessageKoala() {
     overlay.innerHTML = `
         <div class="koala-message-box">
             <div class="personnage-dialogue">
-                <img src="assets/koala.png" alt="Koala">
+                <img src="assets/koala.png" alt="Professeur Panda">
             </div>
             <div class="bubble">
-                <div class="nom-personnage">Koala</div>
+                <div class="nom-personnage">Professeur Panda</div>
                 <div class="texte-dialogue">
                     On va travailler ensemble aujourd'hui sur deux thèmes qui te concernent ! 
                     On parlera de la vie quotidienne, de ce que tu fais toute la journée ! 
@@ -392,7 +666,7 @@ function afficherMessageKoala() {
                     C'est parti ! Je laisse la parole à Monsieur Chat pour t'expliquer la première leçon ! 
                     A bientôt !
                 </div>
-                <button class="bouton-continuer" id="btnKoalaContinuer">Continue →</button>
+                <button class="bouton-continuer" id="btnPandaContinuer">Continue →</button>
             </div>
         </div>
     `;
@@ -403,7 +677,7 @@ function afficherMessageKoala() {
     requestAnimationFrame(() => overlay.classList.add('show'));
     
     // Événement sur le bouton continuer
-    document.getElementById('btnKoalaContinuer').addEventListener('click', () => {
+    document.getElementById('btnPandaContinuer').addEventListener('click', () => {
         overlay.classList.remove('show');
         setTimeout(() => {
             overlay.remove();
@@ -432,9 +706,24 @@ function afficherRitual() {
     const zoneExercice = document.getElementById('zoneExercice');
     const texteDialogue = document.getElementById('texteDialogue');
     const btnContinuer = document.getElementById('btnContinuer');
+    const dialogueBox = document.querySelector('.dialogue-box');
     
     // Utiliser le koala pour le ritual
     changerPersonnage('koala');
+    
+    // Ajouter/supprimer bouton skip admin
+    let btnSkip = document.querySelector('.btn-skip-admin');
+    if (modeAdmin) {
+        if (!btnSkip) {
+            btnSkip = document.createElement('button');
+            btnSkip.className = 'btn-skip-admin';
+            btnSkip.textContent = 'Skip ⏭';
+            btnSkip.onclick = skipNiveau;
+            dialogueBox.appendChild(btnSkip);
+        }
+    } else if (btnSkip) {
+        btnSkip.remove();
+    }
     
     // Date du jour
     const aujourdhui = new Date();
@@ -459,7 +748,7 @@ function afficherRitual() {
     
     // Afficher le speaker flottant avec le koala
     removeSpeakerFloat();
-    createSpeakerFloat('Koala', texteDialogue.textContent, 'koala');
+    createSpeakerFloat('Professeur Panda', texteDialogue.textContent, 'koala');
     container.style.display = 'flex';
 }
 
@@ -925,6 +1214,496 @@ function afficherExercice1_2() {
     });
 }
 
+/**
+ * Exercice 1.3 : Drag & Drop Audio - Associer sons et images
+ */
+function afficherExercice1_3() {
+    const zoneExercice = document.getElementById('zoneExercice');
+    const btnContinuer = document.getElementById('btnContinuer');
+    
+    zoneExercice.style.display = 'block';
+    btnContinuer.style.display = 'none';
+    
+    // Associations son -> image
+    const associations = [
+        { sound: '1.3_brush', image: 'brush' },
+        { sound: '1.3_playf', image: 'playf' },
+        { sound: '1.3_school', image: 'school' },
+        { sound: '1.3_story', image: 'story' },
+        { sound: '1.3_toys', image: 'play' },
+        { sound: '1.3_watch', image: 'tv' }
+    ];
+    
+    // Mélanger les sons et les images séparément
+    const soundsShuffled = shuffle([...associations]);
+    const imagesShuffled = shuffle([...associations]);
+    
+    // Créer le HTML des zones de drop (avec boutons audio)
+    let rowsHTML = soundsShuffled.map((item, index) => `
+        <div class="audio-match-row" data-sound="${item.sound}" data-expected="${item.image}">
+            <button class="audio-btn" data-sound="${item.sound}" title="Écouter">
+                🔊
+            </button>
+            <div class="drop-zone" data-sound="${item.sound}"></div>
+        </div>
+    `).join('');
+    
+    // Créer le HTML des images draggables
+    let imagesHTML = imagesShuffled.map(item => `
+        <div class="drag-image" draggable="true" data-image="${item.image}">
+            <img src="assets/${item.image}.png" alt="${item.image}">
+        </div>
+    `).join('');
+    
+    zoneExercice.innerHTML = `
+        <div class="audio-match-container">
+            ${rowsHTML}
+        </div>
+        <div class="drag-images-container" id="dragImagesContainer">
+            ${imagesHTML}
+        </div>
+        <div id="messageAudioMatch" class="message-match"></div>
+    `;
+    
+    const messageDiv = document.getElementById('messageAudioMatch');
+    const dragContainer = document.getElementById('dragImagesContainer');
+    let correctCount = 0;
+    const total = associations.length;
+    
+    // Audio actuellement en cours
+    let currentAudio = null;
+    
+    // Événements sur les boutons audio
+    zoneExercice.querySelectorAll('.audio-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const soundName = btn.dataset.sound;
+            
+            // Arrêter l'audio en cours
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                document.querySelectorAll('.audio-btn').forEach(b => b.classList.remove('playing'));
+            }
+            
+            // Jouer le nouveau son
+            currentAudio = new Audio(`sounds/${soundName}.wav`);
+            btn.classList.add('playing');
+            
+            currentAudio.play();
+            currentAudio.onended = () => {
+                btn.classList.remove('playing');
+            };
+        });
+    });
+    
+    // Drag & Drop
+    let draggedElement = null;
+    
+    // Événements sur les images draggables
+    zoneExercice.querySelectorAll('.drag-image').forEach(img => {
+        img.addEventListener('dragstart', (e) => {
+            // Ne pas permettre de drag si dans une zone correcte
+            const parentZone = img.closest('.drop-zone');
+            if (parentZone && parentZone.classList.contains('correct')) {
+                e.preventDefault();
+                return;
+            }
+            
+            draggedElement = img;
+            img.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        });
+        
+        img.addEventListener('dragend', () => {
+            if (draggedElement) {
+                draggedElement.classList.remove('dragging');
+                draggedElement = null;
+            }
+            // Retirer tous les drag-over
+            zoneExercice.querySelectorAll('.drop-zone').forEach(zone => {
+                zone.classList.remove('drag-over');
+            });
+        });
+    });
+    
+    // Événements sur les drop zones
+    zoneExercice.querySelectorAll('.drop-zone').forEach(zone => {
+        zone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (!zone.classList.contains('correct')) {
+                zone.classList.add('drag-over');
+            }
+        });
+        
+        zone.addEventListener('dragleave', () => {
+            zone.classList.remove('drag-over');
+        });
+        
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            zone.classList.remove('drag-over');
+            
+            if (!draggedElement || zone.classList.contains('correct')) return;
+            
+            const imageKey = draggedElement.dataset.image;
+            const row = zone.closest('.audio-match-row');
+            const expectedImage = row.dataset.expected;
+            
+            // Si la zone contient déjà une image, la remettre dans le conteneur
+            const existingImage = zone.querySelector('.drag-image');
+            if (existingImage) {
+                dragContainer.appendChild(existingImage);
+                // Si c'était correct, décrémenter le compteur
+                if (zone.classList.contains('correct')) {
+                    correctCount--;
+                }
+                zone.classList.remove('correct', 'wrong');
+            }
+            
+            // Placer l'image dans la zone
+            zone.appendChild(draggedElement);
+            
+            // Vérifier si c'est correct
+            if (imageKey === expectedImage) {
+                zone.classList.add('correct');
+                zone.classList.remove('wrong');
+                correctCount++;
+                
+                // Vérifier si tout est complété
+                if (correctCount === total) {
+                    exerciceTermine = true;
+                    messageDiv.innerHTML = creerMessageFeedback('success', '🎉 Perfect!');
+                    setTimeout(() => btnContinuer.style.display = 'block', 400);
+                }
+            } else {
+                zone.classList.add('wrong');
+                
+                // Remettre l'image dans le conteneur après l'animation
+                setTimeout(() => {
+                    zone.classList.remove('wrong');
+                    if (zone.contains(draggedElement)) {
+                        dragContainer.appendChild(draggedElement);
+                    }
+                }, 600);
+            }
+            
+            draggedElement.classList.remove('dragging');
+            draggedElement = null;
+        });
+    });
+    
+    // Permettre de remettre une image dans le conteneur
+    dragContainer.addEventListener('dragover', (e) => {
+        e.preventDefault();
+    });
+    
+    dragContainer.addEventListener('drop', (e) => {
+        e.preventDefault();
+        if (draggedElement) {
+            // Vérifier si l'image vient d'une zone correcte
+            const parentZone = draggedElement.closest('.drop-zone');
+            if (parentZone && parentZone.classList.contains('correct')) {
+                return; // Ne pas permettre de retirer une image correcte
+            }
+            
+            if (parentZone) {
+                parentZone.classList.remove('correct', 'wrong');
+            }
+            dragContainer.appendChild(draggedElement);
+            draggedElement.classList.remove('dragging');
+            draggedElement = null;
+        }
+    });
+}
+
+/**
+ * Exercice 2.1 : AM/PM - Soleil ou Lune
+ */
+function afficherExercice2_1() {
+    const zoneExercice = document.getElementById('zoneExercice');
+    const btnContinuer = document.getElementById('btnContinuer');
+    
+    zoneExercice.style.display = 'block';
+    btnContinuer.style.display = 'none';
+    
+    // Heures à afficher avec leur réponse (am = soleil, pm = lune)
+    const heures = [
+        { time: '5:00 PM', answer: 'pm' },
+        { time: '10:00 PM', answer: 'pm' },
+        { time: '8:00 AM', answer: 'am' },
+        { time: '7:00 PM', answer: 'pm' },
+        { time: '12:00 PM', answer: 'pm' },
+        { time: '11:00 AM', answer: 'am' },
+        { time: '9:00 AM', answer: 'am' },
+        { time: '10:00 AM', answer: 'am' },
+        { time: '8:00 PM', answer: 'pm' },
+        { time: '12:00 AM', answer: 'am' }
+    ];
+    
+    // Mélanger les heures
+    const heuresMelangees = shuffle([...heures]);
+    
+    // Construire le HTML
+    let rowsHTML = heuresMelangees.map((h, index) => `
+        <div class="ampm-row" data-index="${index}" data-answer="${h.answer}">
+            <div class="ampm-time">${h.time}</div>
+            <div class="ampm-choices">
+                <div class="ampm-choice" data-choice="am" tabindex="0">
+                    <img src="assets/sun.png" alt="Matin (AM)">
+                </div>
+                <div class="ampm-choice" data-choice="pm" tabindex="0">
+                    <img src="assets/moon.png" alt="Après-midi (PM)">
+                </div>
+            </div>
+        </div>
+    `).join('');
+    
+    zoneExercice.innerHTML = `
+        <div class="ampm-container">
+            ${rowsHTML}
+        </div>
+        <button class="ampm-verify-btn" id="btnVerifierAmPm">Vérifier ✓</button>
+        <div id="messageAmPm" class="message-match"></div>
+    `;
+    
+    const messageDiv = document.getElementById('messageAmPm');
+    
+    // Événements sur les choix (soleil/lune)
+    zoneExercice.querySelectorAll('.ampm-choice').forEach(choice => {
+        choice.addEventListener('click', () => {
+            const row = choice.closest('.ampm-row');
+            
+            // Si déjà validé correct, ne rien faire
+            if (row.classList.contains('validated')) return;
+            
+            // Désélectionner les autres choix de cette ligne
+            row.querySelectorAll('.ampm-choice').forEach(c => {
+                c.classList.remove('selected', 'wrong');
+            });
+            row.classList.remove('error');
+            
+            // Sélectionner ce choix
+            choice.classList.add('selected');
+        });
+    });
+    
+    // Bouton vérifier
+    document.getElementById('btnVerifierAmPm').addEventListener('click', () => {
+        let toutCorrect = true;
+        let toutRempli = true;
+        
+        zoneExercice.querySelectorAll('.ampm-row').forEach(row => {
+            // Si déjà validé correct, on passe
+            if (row.classList.contains('validated')) return;
+            
+            const answer = row.dataset.answer;
+            const selected = row.querySelector('.ampm-choice.selected');
+            
+            // Réinitialiser les classes d'erreur
+            row.querySelectorAll('.ampm-choice').forEach(c => {
+                c.classList.remove('wrong');
+            });
+            row.classList.remove('error');
+            
+            if (!selected) {
+                // Pas de sélection
+                toutRempli = false;
+                toutCorrect = false;
+                row.classList.add('error');
+            } else if (selected.dataset.choice === answer) {
+                // Bonne réponse - on la valide définitivement
+                selected.classList.remove('selected');
+                selected.classList.add('correct');
+                row.classList.add('validated');
+            } else {
+                // Mauvaise réponse - on montre l'erreur mais on laisse modifiable
+                selected.classList.add('wrong');
+                row.classList.add('error');
+                toutCorrect = false;
+                
+                // Retirer la classe wrong après l'animation pour permettre de re-sélectionner
+                setTimeout(() => {
+                    selected.classList.remove('wrong', 'selected');
+                }, 600);
+            }
+        });
+        
+        // Vérifier si tout est validé
+        const totalRows = zoneExercice.querySelectorAll('.ampm-row').length;
+        const validatedRows = zoneExercice.querySelectorAll('.ampm-row.validated').length;
+        
+        if (!toutRempli) {
+            messageDiv.innerHTML = creerMessageFeedback('warning', '⚠️ Sélectionne une réponse pour chaque heure !');
+        } else if (validatedRows === totalRows) {
+            messageDiv.innerHTML = creerMessageFeedback('success', '🎉 Perfect!');
+            exerciceTermine = true;
+            setTimeout(() => btnContinuer.style.display = 'block', 400);
+        } else if (toutCorrect) {
+            messageDiv.innerHTML = creerMessageFeedback('success', '🎉 Perfect!');
+            exerciceTermine = true;
+            setTimeout(() => btnContinuer.style.display = 'block', 400);
+        } else {
+            messageDiv.innerHTML = creerMessageFeedback('error', '❌ Certaines réponses sont incorrectes, essaye encore !');
+        }
+    });
+}
+
+/**
+ * Exercice 2.2 : Audio AM/PM - Écouter et choisir AM ou PM
+ */
+function afficherExercice2_2() {
+    const zoneExercice = document.getElementById('zoneExercice');
+    const btnContinuer = document.getElementById('btnContinuer');
+    
+    zoneExercice.style.display = 'block';
+    btnContinuer.style.display = 'none';
+    
+    // Associations audio -> réponse
+    const associations = [
+        { sound: '2.2_7h', answer: 'am' },
+        { sound: '2.2_12h', answer: 'pm' },
+        { sound: '2.2_17h', answer: 'pm' },
+        { sound: '2.2_8h', answer: 'am' },
+        { sound: '2.2_15h', answer: 'pm' },
+        { sound: '2.2_21h', answer: 'pm' },
+        { sound: '2.2_10h', answer: 'am' },
+        { sound: '2.2_16h', answer: 'pm' },
+        { sound: '2.2_18h', answer: 'pm' },
+        { sound: '2.2_14h', answer: 'pm' }
+    ];
+    
+    // Mélanger les associations
+    const shuffledAssociations = shuffle([...associations]);
+    
+    // Créer le HTML
+    let rowsHTML = shuffledAssociations.map((item, index) => `
+        <div class="audio-ampm-row" data-index="${index}" data-answer="${item.answer}" data-sound="${item.sound}">
+            <button class="audio-btn" data-sound="${item.sound}" title="Écouter">
+                🔊
+            </button>
+            <div class="audio-ampm-choices">
+                <div class="audio-ampm-choice" data-choice="am">AM</div>
+                <div class="audio-ampm-choice" data-choice="pm">PM</div>
+            </div>
+        </div>
+    `).join('');
+    
+    zoneExercice.innerHTML = `
+        <div class="audio-ampm-container">
+            ${rowsHTML}
+        </div>
+        <button class="ampm-verify-btn" id="btnVerifierAudioAmPm">Vérifier ✓</button>
+        <div id="messageAudioAmPm" class="message-match"></div>
+    `;
+    
+    const messageDiv = document.getElementById('messageAudioAmPm');
+    
+    // Audio actuellement en cours
+    let currentAudio = null;
+    
+    // Événements sur les boutons audio
+    zoneExercice.querySelectorAll('.audio-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const soundName = btn.dataset.sound;
+            
+            // Arrêter l'audio en cours
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                document.querySelectorAll('.audio-btn').forEach(b => b.classList.remove('playing'));
+            }
+            
+            // Jouer le nouveau son
+            currentAudio = new Audio(`sounds/${soundName}.wav`);
+            btn.classList.add('playing');
+            
+            currentAudio.play();
+            currentAudio.onended = () => {
+                btn.classList.remove('playing');
+            };
+        });
+    });
+    
+    // Événements sur les choix AM/PM
+    zoneExercice.querySelectorAll('.audio-ampm-choice').forEach(choice => {
+        choice.addEventListener('click', () => {
+            const row = choice.closest('.audio-ampm-row');
+            
+            // Si déjà validé, ne rien faire
+            if (row.classList.contains('validated')) return;
+            
+            // Désélectionner les autres choix de cette ligne
+            row.querySelectorAll('.audio-ampm-choice').forEach(c => {
+                c.classList.remove('selected', 'wrong');
+            });
+            row.classList.remove('error');
+            
+            // Sélectionner ce choix
+            choice.classList.add('selected');
+        });
+    });
+    
+    // Bouton vérifier
+    document.getElementById('btnVerifierAudioAmPm').addEventListener('click', () => {
+        let toutCorrect = true;
+        let toutRempli = true;
+        
+        zoneExercice.querySelectorAll('.audio-ampm-row').forEach(row => {
+            // Si déjà validé, on passe
+            if (row.classList.contains('validated')) return;
+            
+            const answer = row.dataset.answer;
+            const selected = row.querySelector('.audio-ampm-choice.selected');
+            
+            // Réinitialiser les classes d'erreur
+            row.querySelectorAll('.audio-ampm-choice').forEach(c => {
+                c.classList.remove('wrong');
+            });
+            row.classList.remove('error');
+            
+            if (!selected) {
+                // Pas de sélection
+                toutRempli = false;
+                toutCorrect = false;
+                row.classList.add('error');
+            } else if (selected.dataset.choice === answer) {
+                // Bonne réponse - on la valide définitivement
+                selected.classList.remove('selected');
+                selected.classList.add('correct');
+                row.classList.add('validated');
+            } else {
+                // Mauvaise réponse - on montre l'erreur mais on laisse modifiable
+                selected.classList.add('wrong');
+                row.classList.add('error');
+                toutCorrect = false;
+                
+                // Retirer la classe wrong après l'animation pour permettre de re-sélectionner
+                setTimeout(() => {
+                    selected.classList.remove('wrong', 'selected');
+                }, 600);
+            }
+        });
+        
+        // Vérifier si tout est validé
+        const totalRows = zoneExercice.querySelectorAll('.audio-ampm-row').length;
+        const validatedRows = zoneExercice.querySelectorAll('.audio-ampm-row.validated').length;
+        
+        if (!toutRempli) {
+            messageDiv.innerHTML = creerMessageFeedback('warning', '⚠️ Sélectionne une réponse pour chaque audio !');
+        } else if (validatedRows === totalRows) {
+            messageDiv.innerHTML = creerMessageFeedback('success', '🎉 Perfect!');
+            exerciceTermine = true;
+            setTimeout(() => btnContinuer.style.display = 'block', 400);
+        } else if (toutCorrect) {
+            messageDiv.innerHTML = creerMessageFeedback('success', '🎉 Perfect!');
+            exerciceTermine = true;
+            setTimeout(() => btnContinuer.style.display = 'block', 400);
+        } else {
+            messageDiv.innerHTML = creerMessageFeedback('error', '❌ Certaines réponses sont incorrectes, essaye encore !');
+        }
+    });
+}
+
 /* ============================================================
    7. FONCTIONS UTILITAIRES
    ============================================================ */
@@ -957,8 +1736,8 @@ function changerPersonnage(type) {
     
     if (type === 'koala') {
         persoEl.querySelector('img').src = 'assets/koala.png';
-        persoEl.querySelector('img').alt = 'Koala';
-        nomEl.textContent = 'Koala';
+        persoEl.querySelector('img').alt = 'Professeur Panda';
+        nomEl.textContent = 'Professeur Panda';
     } else {
         persoEl.querySelector('img').src = 'assets/cat.png';
         persoEl.querySelector('img').alt = 'Monsieur Chat';
@@ -982,15 +1761,16 @@ function createSpeakerFloat(nom, texte, type = 'chat') {
     
     // Créer l'avatar selon le type
     const imgSrc = type === 'koala' ? 'assets/koala.png' : 'assets/cat.png';
-    const imgAlt = type === 'koala' ? 'Koala' : 'Monsieur Chat';
+    const imgAlt = type === 'koala' ? 'Professeur Panda' : 'Monsieur Chat';
     
     wrapper.innerHTML = `
         <div class="personnage-dialogue">
             <img src="${imgSrc}" alt="${imgAlt}">
+            <button class="bubble-toggle" title="Reduire">-</button>
         </div>
         <div class="bubble">
             <div class="nom-personnage">${nom || imgAlt}</div>
-            <div class="texte-dialogue">${texte || ''}</div>
+            <div class="texte-dialogue" id="speakerTexte"></div>
         </div>
     `;
     
@@ -1002,6 +1782,53 @@ function createSpeakerFloat(nom, texte, type = 'chat') {
     
     // Animation d'apparition
     requestAnimationFrame(() => wrapper.classList.add('show'));
+    
+    // Effet machine à écrire
+    const texteEl = wrapper.querySelector('#speakerTexte');
+    typeWriter(texteEl, texte);
+    
+    // Bouton toggle pour réduire/agrandir la bulle
+    const toggleBtn = wrapper.querySelector('.bubble-toggle');
+    const bubble = wrapper.querySelector('.bubble');
+    
+    toggleBtn.addEventListener('click', () => {
+        bubble.classList.toggle('minimized');
+        toggleBtn.textContent = bubble.classList.contains('minimized') ? '+' : '-';
+        toggleBtn.title = bubble.classList.contains('minimized') ? 'Ouvrir' : 'Reduire';
+    });
+}
+
+/**
+ * Effet machine à écrire
+ * @param {HTMLElement} element - Élément où écrire
+ * @param {string} texte - Texte à afficher
+ * @param {number} vitesse - Vitesse en ms par caractère (défaut: 30)
+ */
+function typeWriter(element, texte, vitesse = 30) {
+    let index = 0;
+    element.innerHTML = '<span class="typewriter-cursor"></span>';
+    
+    // Stocker l'ID de l'intervalle pour pouvoir l'arrêter
+    const intervalId = setInterval(() => {
+        if (index < texte.length) {
+            // Insérer le caractère avant le curseur
+            const cursor = element.querySelector('.typewriter-cursor');
+            if (cursor) {
+                cursor.insertAdjacentText('beforebegin', texte.charAt(index));
+            }
+            index++;
+        } else {
+            // Fin du texte, retirer le curseur après un délai
+            clearInterval(intervalId);
+            setTimeout(() => {
+                const cursor = element.querySelector('.typewriter-cursor');
+                if (cursor) cursor.remove();
+            }, 1000);
+        }
+    }, vitesse);
+    
+    // Stocker l'intervalle pour pouvoir l'arrêter si nécessaire
+    element.dataset.typewriterInterval = intervalId;
 }
 
 /**

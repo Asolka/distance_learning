@@ -44,14 +44,15 @@
         </div>
     </div>
 
-    <!-- SPEAKER FLOTTANT PAGE D'ACCUEIL (Koala) -->
+    <!-- SPEAKER FLOTTANT PAGE D'ACCUEIL (Professeur Panda) -->
     <div class="speaker-float speaker-accueil show" id="speakerAccueil">
         <div class="personnage-dialogue">
-            <img src="assets/koala.png" alt="Koala">
+            <img src="assets/koala.png" alt="Professeur Panda">
+            <button class="bubble-toggle" id="toggleAccueil" title="Reduire">-</button>
         </div>
-        <div class="bubble">
-            <div class="nom-personnage">Koala</div>
-            <div class="texte-dialogue">Hello, Welcome! Passons du temps ensemble pour une leçon d'anglais, tu verras ce sera amusant ! What is your name ?</div>
+        <div class="bubble" id="bubbleAccueil">
+            <div class="nom-personnage">Professeur Panda</div>
+            <div class="texte-dialogue" id="texteAccueil"></div>
         </div>
     </div>
 
@@ -62,6 +63,7 @@
                 <img src="assets/cat.png" alt="Monsieur Chat">
             </div>
             <div class="dialogue-box">
+                <button class="bouton-retour" id="btnRetour" title="Retour">‹</button>
                 <div class="contenu-dialogue">
                     <div class="nom-personnage" id="nomPersonnage">Monsieur Chat</div>
                     <div class="texte-dialogue" id="texteDialogue">
