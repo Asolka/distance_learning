@@ -193,8 +193,8 @@ function genererNiveaux() {
             div.style.cssText = `left: 50%; top: ${yPosition}px; transform: translateX(-50%)`;
             yPosition += 350;
         } else if (niveau.type === 'evaluation') {
-            // Évaluation : centrée en bas
-            div.style.cssText = `left: 50%; top: ${yPosition + 200}px; transform: translateX(-50%)`;
+            // Évaluation : centrée en bas (remontée de 50px)
+            div.style.cssText = `left: 50%; top: ${yPosition + 150}px; transform: translateX(-50%)`;
         } else {
             // Autres niveaux : alternance gauche/droite
             const posIndex = index % positionsX.length;
@@ -626,6 +626,20 @@ function afficherDialogue(niveauId) {
                 exerciceTermine = false;
                 removeSpeakerFloat();
                 createSpeakerFloat('Monsieur Chat', texteDialogue.textContent, 'chat');
+            } else if (niveauId === 11) {
+                // Exercice 3.2 : Choix de traduction AM/PM
+                texteDialogue.textContent = `Voici des phrases écrites en français. En dessous, tu as deux versions de la même phrase traduite en anglais. Seulement il y a une différence : AM et PM ! À toi de cocher la bonne traduction, fais bien attention à l'heure !`;
+                afficherExercice3_2();
+                exerciceTermine = false;
+                removeSpeakerFloat();
+                createSpeakerFloat('Monsieur Chat', texteDialogue.textContent, 'chat');
+            } else if (niveauId === 12) {
+                // Exercice 3.3 : Compléter les phrases
+                texteDialogue.textContent = `Dernier exercice ! Voici des phrases en français. En dessous, tu as la même phrase en anglais. Mais attention ! Il lui manque des mots ! Pour compléter la phrase en anglais, tu as des petites listes avec les mots manquants. À toi de choisir les bons mots au bon endroit. Tu peux t'aider de la phrase en français pour compléter la phrase anglaise.`;
+                afficherExercice3_3();
+                exerciceTermine = false;
+                removeSpeakerFloat();
+                createSpeakerFloat('Monsieur Chat', texteDialogue.textContent, 'chat');
             } else {
                 // Exercices non implémentés
                 texteDialogue.textContent = `Exercice ${niveau.nom}. Contenu à venir...`;
@@ -707,7 +721,7 @@ function afficherMessagePanda() {
     overlay.innerHTML = `
         <div class="koala-message-box">
             <div class="personnage-dialogue">
-                <img src="assets/koala.png" alt="Professeur Panda">
+                <img src="assets/koala.jpg" alt="Professeur Panda">
             </div>
             <div class="bubble">
                 <div class="nom-personnage">Professeur Panda</div>
@@ -1137,28 +1151,28 @@ function afficherExercice1_2() {
     zoneExercice.style.display = 'block';
     btnContinuer.style.display = 'none';
     
-    // Phrases avec leurs traductions et le verbe attendu
+    // Phrases avec leurs traductions et le verbe attendu (maintenant en anglais)
     const phrases = [
-        { english: "I wake up at 7.", french: "Je me _ à 7h.", answer: "lève" },
-        { english: "I brush my teeth.", french: "Je me _ les dents.", answer: "brosse" },
-        { english: "I eat my breakfast in the morning.", french: "Je _ mon petit-déjeuner le matin.", answer: "mange" },
-        { english: "I do my homework after school.", french: "Je _ mes devoirs après l'école.", answer: "fais" },
-        { english: "I play a game with my friends.", french: "Je _ à un jeu avec mes amis.", answer: "joue" },
-        { english: "I watch TV with my family.", french: "Je _ la télé avec ma famille.", answer: "regarde" },
-        { english: "I take a shower after sport.", french: "Je _ une douche après le sport.", answer: "prends" }
+        { french: "Je me lève à 7h.", english: "I _ up at 7.", answer: "wake" },
+        { french: "Je me brosse les dents.", english: "I _ my teeth.", answer: "brush" },
+        { french: "Je mange mon petit-déjeuner le matin.", english: "I _ my breakfast in the morning.", answer: "eat" },
+        { french: "Je fais mes devoirs après l'école.", english: "I _ my homework after school.", answer: "do" },
+        { french: "Je joue à un jeu avec mes amis.", english: "I _ a game with my friends.", answer: "play" },
+        { french: "Je regarde la télé avec ma famille.", english: "I _ TV with my family.", answer: "watch" },
+        { french: "Je prends une douche après le sport.", english: "I _ a shower after sport.", answer: "take" }
     ];
     
-    // Verbes disponibles (mélangés)
-    const verbes = shuffle(["mange", "joue", "brosse", "prends", "regarde", "lève", "fais"]);
+    // Verbes disponibles en anglais (mélangés)
+    const verbes = shuffle(["eat", "play", "brush", "take", "watch", "wake", "do"]);
     
-    // Construire le HTML
+    // Construire le HTML (français en haut, anglais à compléter en bas)
     let phrasesHTML = '';
     phrases.forEach((p, index) => {
-        // Découper la phrase française autour du "_"
-        const parts = p.french.split('_');
+        // Découper la phrase anglaise autour du "_"
+        const parts = p.english.split('_');
         phrasesHTML += `
             <div class="fill-phrase" data-index="${index}" data-answer="${p.answer}">
-                <div class="fill-english">${p.english}</div>
+                <div class="fill-english">${p.french}</div>
                 <div class="fill-french">
                     <span>${parts[0]}</span>
                     <span class="fill-gap" data-index="${index}"></span>
@@ -1340,9 +1354,9 @@ function afficherExercice1_3() {
         </div>
     `).join('');
     
-    // Créer le HTML des images draggables
+    // Créer le HTML des images cliquables
     let imagesHTML = imagesShuffled.map(item => `
-        <div class="drag-image" draggable="true" data-image="${item.image}">
+        <div class="drag-image" data-image="${item.image}">
             <img src="assets/${item.image}.png" alt="${item.image}">
         </div>
     `).join('');
@@ -1354,6 +1368,7 @@ function afficherExercice1_3() {
         <div class="drag-images-container" id="dragImagesContainer">
             ${imagesHTML}
         </div>
+        <button class="ampm-verify-btn" id="btnVerifierAudio">Vérifier ✓</button>
         <div id="messageAudioMatch" class="message-match"></div>
     `;
     
@@ -1362,11 +1377,13 @@ function afficherExercice1_3() {
     
     const messageDiv = document.getElementById('messageAudioMatch');
     const dragContainer = document.getElementById('dragImagesContainer');
-    let correctCount = 0;
     const total = associations.length;
     
     // Audio actuellement en cours
     let currentAudio = null;
+    
+    // Image actuellement sélectionnée
+    let selectedImage = null;
     
     // Événements sur les boutons audio
     zoneExercice.querySelectorAll('.audio-btn').forEach(btn => {
@@ -1391,122 +1408,121 @@ function afficherExercice1_3() {
         });
     });
     
-    // Drag & Drop
-    let draggedElement = null;
-    
-    // Événements sur les images draggables
+    // Événements sur les images cliquables
     zoneExercice.querySelectorAll('.drag-image').forEach(img => {
-        img.addEventListener('dragstart', (e) => {
-            // Ne pas permettre de drag si dans une zone correcte
+        img.addEventListener('click', () => {
+            // Ne pas permettre de sélectionner si dans une zone validée (correcte)
             const parentZone = img.closest('.drop-zone');
-            if (parentZone && parentZone.classList.contains('correct')) {
-                e.preventDefault();
+            const parentRow = img.closest('.audio-match-row');
+            if (parentRow && parentRow.classList.contains('validated')) {
                 return;
             }
             
-            draggedElement = img;
-            img.classList.add('dragging');
-            e.dataTransfer.effectAllowed = 'move';
-        });
-        
-        img.addEventListener('dragend', () => {
-            if (draggedElement) {
-                draggedElement.classList.remove('dragging');
-                draggedElement = null;
+            // Désélectionner l'ancienne image
+            if (selectedImage) {
+                selectedImage.classList.remove('selected');
             }
-            // Retirer tous les drag-over
-            zoneExercice.querySelectorAll('.drop-zone').forEach(zone => {
-                zone.classList.remove('drag-over');
-            });
+            
+            // Sélectionner ou désélectionner
+            if (selectedImage === img) {
+                selectedImage = null;
+            } else {
+                selectedImage = img;
+                img.classList.add('selected');
+            }
         });
     });
     
     // Événements sur les drop zones
     zoneExercice.querySelectorAll('.drop-zone').forEach(zone => {
-        zone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            if (!zone.classList.contains('correct')) {
-                zone.classList.add('drag-over');
-            }
-        });
-        
-        zone.addEventListener('dragleave', () => {
-            zone.classList.remove('drag-over');
-        });
-        
-        zone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            zone.classList.remove('drag-over');
-            
-            if (!draggedElement || zone.classList.contains('correct')) return;
-            
-            const imageKey = draggedElement.dataset.image;
+        zone.addEventListener('click', (e) => {
             const row = zone.closest('.audio-match-row');
-            const expectedImage = row.dataset.expected;
+            
+            // Si zone déjà validée, ne rien faire
+            if (row && row.classList.contains('validated')) return;
+            
+            // Si on clique sur une image dans la zone, on la sélectionne
+            const clickedImage = e.target.closest('.drag-image');
+            if (clickedImage) {
+                return; // L'événement sera géré par le listener de l'image
+            }
+            
+            // Si pas d'image sélectionnée, ne rien faire
+            if (!selectedImage) return;
             
             // Si la zone contient déjà une image, la remettre dans le conteneur
             const existingImage = zone.querySelector('.drag-image');
             if (existingImage) {
+                existingImage.classList.remove('selected');
                 dragContainer.appendChild(existingImage);
-                // Si c'était correct, décrémenter le compteur
-                if (zone.classList.contains('correct')) {
-                    correctCount--;
-                }
-                zone.classList.remove('correct', 'wrong');
             }
             
             // Placer l'image dans la zone
-            zone.appendChild(draggedElement);
+            selectedImage.classList.remove('selected');
+            zone.appendChild(selectedImage);
+            selectedImage = null;
+        });
+    });
+    
+    // Bouton vérifier
+    document.getElementById('btnVerifierAudio').addEventListener('click', () => {
+        let toutCorrect = true;
+        let toutRempli = true;
+        
+        zoneExercice.querySelectorAll('.audio-match-row').forEach(row => {
+            // Si déjà validé, on passe
+            if (row.classList.contains('validated')) return;
             
-            // Vérifier si c'est correct
-            if (imageKey === expectedImage) {
+            const zone = row.querySelector('.drop-zone');
+            const expectedImage = row.dataset.expected;
+            const placedImage = zone.querySelector('.drag-image');
+            
+            // Réinitialiser les classes
+            zone.classList.remove('correct', 'wrong');
+            row.classList.remove('error');
+            
+            if (!placedImage) {
+                // Pas d'image placée
+                toutRempli = false;
+                toutCorrect = false;
+                row.classList.add('error');
+            } else if (placedImage.dataset.image === expectedImage) {
+                // Bonne réponse
                 zone.classList.add('correct');
-                zone.classList.remove('wrong');
-                correctCount++;
-                
-                // Vérifier si tout est complété
-                if (correctCount === total) {
-                    exerciceTermine = true;
-                    messageDiv.innerHTML = creerMessageFeedback('success', '🎉 Perfect!');
-                    setTimeout(() => btnContinuer.style.display = 'block', 400);
-                }
+                row.classList.add('validated');
             } else {
+                // Mauvaise réponse
                 zone.classList.add('wrong');
+                row.classList.add('error');
+                toutCorrect = false;
                 
                 // Remettre l'image dans le conteneur après l'animation
                 setTimeout(() => {
                     zone.classList.remove('wrong');
-                    if (zone.contains(draggedElement)) {
-                        dragContainer.appendChild(draggedElement);
+                    row.classList.remove('error');
+                    if (zone.contains(placedImage)) {
+                        dragContainer.appendChild(placedImage);
                     }
                 }, 600);
             }
-            
-            draggedElement.classList.remove('dragging');
-            draggedElement = null;
         });
-    });
-    
-    // Permettre de remettre une image dans le conteneur
-    dragContainer.addEventListener('dragover', (e) => {
-        e.preventDefault();
-    });
-    
-    dragContainer.addEventListener('drop', (e) => {
-        e.preventDefault();
-        if (draggedElement) {
-            // Vérifier si l'image vient d'une zone correcte
-            const parentZone = draggedElement.closest('.drop-zone');
-            if (parentZone && parentZone.classList.contains('correct')) {
-                return; // Ne pas permettre de retirer une image correcte
-            }
-            
-            if (parentZone) {
-                parentZone.classList.remove('correct', 'wrong');
-            }
-            dragContainer.appendChild(draggedElement);
-            draggedElement.classList.remove('dragging');
-            draggedElement = null;
+        
+        // Vérifier si tout est validé
+        const totalRows = zoneExercice.querySelectorAll('.audio-match-row').length;
+        const validatedRows = zoneExercice.querySelectorAll('.audio-match-row.validated').length;
+        
+        if (!toutRempli) {
+            messageDiv.innerHTML = creerMessageFeedback('warning', '⚠️ Place une image pour chaque son !');
+        } else if (validatedRows === totalRows) {
+            messageDiv.innerHTML = creerMessageFeedback('success', '🎉 Perfect!');
+            exerciceTermine = true;
+            setTimeout(() => btnContinuer.style.display = 'block', 400);
+        } else if (toutCorrect) {
+            messageDiv.innerHTML = creerMessageFeedback('success', '🎉 Perfect!');
+            exerciceTermine = true;
+            setTimeout(() => btnContinuer.style.display = 'block', 400);
+        } else {
+            messageDiv.innerHTML = creerMessageFeedback('error', '❌ Certaines associations sont incorrectes, essaye encore !');
         }
     });
 }
@@ -1985,6 +2001,330 @@ function afficherExercice2_3() {
     });
 }
 
+/**
+ * Exercice 3.2 : Choix de traduction AM/PM
+ */
+function afficherExercice3_2() {
+    const zoneExercice = document.getElementById('zoneExercice');
+    const btnContinuer = document.getElementById('btnContinuer');
+    
+    zoneExercice.style.display = 'block';
+    btnContinuer.style.display = 'none';
+    
+    // Phrases avec leurs traductions et la bonne réponse (1 ou 2)
+    const phrases = [
+        { 
+            french: "Je me réveille à 7h00",
+            choice1: "I wake up at 7:00 PM",
+            choice2: "I wake up at 7:00 AM",
+            answer: 2
+        },
+        { 
+            french: "Je vais à l'école à 8h00",
+            choice1: "I go to school at 8:00 AM",
+            choice2: "I go to school at 8:00 PM",
+            answer: 1
+        },
+        { 
+            french: "Je mange le déjeuner à 12h00",
+            choice1: "I eat lunch at 12:00 AM",
+            choice2: "I eat lunch at 12:00 PM",
+            answer: 2
+        },
+        { 
+            french: "Je finis l'école à 16h00",
+            choice1: "I finish school at 4:00 AM",
+            choice2: "I finish school at 4:00 PM",
+            answer: 2
+        },
+        { 
+            french: "Je fais mes devoirs à 17h00",
+            choice1: "I do my homework at 5:00 PM",
+            choice2: "I do my homework at 5:00 AM",
+            answer: 1
+        },
+        { 
+            french: "Je regarde la télévision à 18h00",
+            choice1: "I watch TV at 6:00 AM",
+            choice2: "I watch TV at 6:00 PM",
+            answer: 2
+        },
+        { 
+            french: "Je prends un bain à 19h00",
+            choice1: "I take a bath at 7:00 PM",
+            choice2: "I take a bath at 7:00 AM",
+            answer: 1
+        },
+        { 
+            french: "Je lis un livre à 20h00",
+            choice1: "I read a book at 8:00 AM",
+            choice2: "I read a book at 8:00 PM",
+            answer: 2
+        }
+    ];
+    
+    // Créer le HTML
+    let rowsHTML = phrases.map((item, index) => `
+        <div class="traduction-row" data-index="${index}" data-answer="${item.answer}">
+            <div class="traduction-french">${item.french}</div>
+            <div class="traduction-choices">
+                <div class="traduction-choice" data-choice="1">${item.choice1}</div>
+                <div class="traduction-choice" data-choice="2">${item.choice2}</div>
+            </div>
+        </div>
+    `).join('');
+    
+    zoneExercice.innerHTML = `
+        <div class="traduction-container">
+            ${rowsHTML}
+        </div>
+        <button class="ampm-verify-btn" id="btnVerifierTraduction">Vérifier ✓</button>
+        <div id="messageTraduction" class="message-match"></div>
+    `;
+    
+    const messageDiv = document.getElementById('messageTraduction');
+    
+    // Événements sur les choix
+    zoneExercice.querySelectorAll('.traduction-choice').forEach(choice => {
+        choice.addEventListener('click', () => {
+            const row = choice.closest('.traduction-row');
+            
+            // Si déjà validé, ne rien faire
+            if (row.classList.contains('validated')) return;
+            
+            // Désélectionner les autres choix de cette ligne
+            row.querySelectorAll('.traduction-choice').forEach(c => {
+                c.classList.remove('selected', 'wrong');
+            });
+            row.classList.remove('error');
+            
+            // Sélectionner ce choix
+            choice.classList.add('selected');
+        });
+    });
+    
+    // Bouton vérifier
+    document.getElementById('btnVerifierTraduction').addEventListener('click', () => {
+        let toutCorrect = true;
+        let toutRempli = true;
+        
+        zoneExercice.querySelectorAll('.traduction-row').forEach(row => {
+            // Si déjà validé, on passe
+            if (row.classList.contains('validated')) return;
+            
+            const answer = parseInt(row.dataset.answer);
+            const selected = row.querySelector('.traduction-choice.selected');
+            
+            // Réinitialiser les classes d'erreur
+            row.querySelectorAll('.traduction-choice').forEach(c => {
+                c.classList.remove('wrong');
+            });
+            row.classList.remove('error');
+            
+            if (!selected) {
+                // Pas de sélection
+                toutRempli = false;
+                toutCorrect = false;
+                row.classList.add('error');
+            } else if (parseInt(selected.dataset.choice) === answer) {
+                // Bonne réponse - on la valide définitivement
+                selected.classList.remove('selected');
+                selected.classList.add('correct');
+                row.classList.add('validated');
+            } else {
+                // Mauvaise réponse - on montre l'erreur mais on laisse modifiable
+                selected.classList.add('wrong');
+                row.classList.add('error');
+                toutCorrect = false;
+                
+                // Retirer la classe wrong après l'animation pour permettre de re-sélectionner
+                setTimeout(() => {
+                    selected.classList.remove('wrong', 'selected');
+                }, 600);
+            }
+        });
+        
+        // Vérifier si tout est validé
+        const totalRows = zoneExercice.querySelectorAll('.traduction-row').length;
+        const validatedRows = zoneExercice.querySelectorAll('.traduction-row.validated').length;
+        
+        if (!toutRempli) {
+            messageDiv.innerHTML = creerMessageFeedback('warning', '⚠️ Sélectionne une réponse pour chaque phrase !');
+        } else if (validatedRows === totalRows) {
+            messageDiv.innerHTML = creerMessageFeedback('success', '🎉 Perfect!');
+            exerciceTermine = true;
+            setTimeout(() => btnContinuer.style.display = 'block', 400);
+        } else if (toutCorrect) {
+            messageDiv.innerHTML = creerMessageFeedback('success', '🎉 Perfect!');
+            exerciceTermine = true;
+            setTimeout(() => btnContinuer.style.display = 'block', 400);
+        } else {
+            messageDiv.innerHTML = creerMessageFeedback('error', '❌ Certaines réponses sont incorrectes, essaye encore !');
+        }
+    });
+}
+
+/**
+ * Exercice 3.3 : Compléter les phrases avec listes déroulantes
+ */
+function afficherExercice3_3() {
+    const zoneExercice = document.getElementById('zoneExercice');
+    const btnContinuer = document.getElementById('btnContinuer');
+    
+    zoneExercice.style.display = 'block';
+    btnContinuer.style.display = 'none';
+    
+    // Phrases avec leurs trous et options
+    // Chaque trou est un objet { options: [...], answer: "bonne réponse" }
+    const phrases = [
+        {
+            french: "Je prends ma douche à 9h.",
+            parts: ["I take my", {options: ["shower", "breakfast"], answer: "shower"}, "at 9:00", {options: ["AM", "PM"], answer: "AM"}]
+        },
+        {
+            french: "Je fais mes devoirs à 17h.",
+            parts: ["I do my", {options: ["homework", "bed", "shower"], answer: "homework"}, "at", {options: ["5:00", "17:00"], answer: "5:00"}, "PM"]
+        },
+        {
+            french: "Je regarde la télévision avec mes parents.",
+            parts: ["I", {options: ["watch", "play", "sleep"], answer: "watch"}, "TV with my", {options: ["family", "parents", "friends"], answer: "parents"}]
+        },
+        {
+            french: "Je me lève tous les jours à 8h.",
+            parts: ["I", {options: ["wake up", "go to bed", "sleep"], answer: "wake up"}, "everyday at", {options: ["8:00 AM", "8:00 PM"], answer: "8:00 AM"}]
+        },
+        {
+            french: "J'adore jouer avec mes amis.",
+            parts: ["I love to", {options: ["play", "do sports", "eat"], answer: "play"}, "with my", {options: ["friends", "family"], answer: "friends"}]
+        },
+        {
+            french: "Je mange mon petit-déjeuner tous les matins.",
+            parts: ["I eat my", {options: ["breakfast", "dinner"], answer: "breakfast"}, "every", {options: ["morning", "evening"], answer: "morning"}]
+        },
+        {
+            french: "Je dors tous les soirs à 20h avec mon nounours.",
+            parts: ["I", {options: ["sleep", "wake up", "eat"], answer: "sleep"}, "every night at", {options: ["8:00 AM", "8:00 PM"], answer: "8:00 PM"}]
+        },
+        {
+            french: "Je me brosse les dents tous les matins et tous les soirs.",
+            parts: ["I", {options: ["brush", "eat", "shower"], answer: "brush"}, "my teeth every", {options: ["morning", "evening"], answer: "morning"}, "and every", {options: ["morning", "evening"], answer: "evening"}]
+        },
+        {
+            french: "Je vais à l'école tous les jours à 9h et je joue avec mes amis pendant la pause.",
+            parts: ["I go to", {options: ["school", "play", "sleep"], answer: "school"}, "every day at 9:00", {options: ["AM", "PM"], answer: "AM"}, "and I", {options: ["play", "eat", "wake up"], answer: "play"}, "with my", {options: ["friends", "parents", "family"], answer: "friends"}, "during the break"]
+        },
+        {
+            french: "Je fais du sport à 16h après l'école.",
+            parts: ["I", {options: ["play", "do sports", "eat"], answer: "do sports"}, "at", {options: ["4:00 PM", "4:00 AM", "16h"], answer: "4:00 PM"}, "after school"]
+        }
+    ];
+    
+    // Générer le HTML
+    let selectIndex = 0;
+    let rowsHTML = phrases.map((phrase, rowIndex) => {
+        let englishHTML = phrase.parts.map(part => {
+            if (typeof part === 'string') {
+                return `<span>${part}</span>`;
+            } else {
+                // C'est un trou avec options
+                const optionsHTML = ['<option value="">...</option>']
+                    .concat(part.options.map(opt => `<option value="${opt}">${opt}</option>`))
+                    .join('');
+                const html = `<select class="complete-select" data-answer="${part.answer}" data-index="${selectIndex}">${optionsHTML}</select>`;
+                selectIndex++;
+                return html;
+            }
+        }).join(' ');
+        
+        return `
+            <div class="complete-row" data-row="${rowIndex}">
+                <div class="complete-french">${phrase.french}</div>
+                <div class="complete-english">${englishHTML}</div>
+            </div>
+        `;
+    }).join('');
+    
+    zoneExercice.innerHTML = `
+        <div class="complete-container">
+            ${rowsHTML}
+        </div>
+        <button class="ampm-verify-btn" id="btnVerifierComplete">Vérifier ✓</button>
+        <div id="messageComplete" class="message-match"></div>
+    `;
+    
+    const messageDiv = document.getElementById('messageComplete');
+    
+    // Bouton vérifier
+    document.getElementById('btnVerifierComplete').addEventListener('click', () => {
+        let toutCorrect = true;
+        let toutRempli = true;
+        
+        zoneExercice.querySelectorAll('.complete-row').forEach(row => {
+            // Si déjà validé, on passe
+            if (row.classList.contains('validated')) return;
+            
+            let rowCorrect = true;
+            let rowRempli = true;
+            
+            row.querySelectorAll('.complete-select').forEach(select => {
+                // Réinitialiser les classes
+                select.classList.remove('correct', 'wrong');
+                
+                const answer = select.dataset.answer;
+                const value = select.value;
+                
+                if (!value) {
+                    rowRempli = false;
+                    toutRempli = false;
+                    toutCorrect = false;
+                } else if (value === answer) {
+                    select.classList.add('correct');
+                } else {
+                    select.classList.add('wrong');
+                    rowCorrect = false;
+                    toutCorrect = false;
+                }
+            });
+            
+            row.classList.remove('error');
+            
+            if (!rowRempli) {
+                row.classList.add('error');
+            } else if (rowCorrect) {
+                row.classList.add('validated');
+            } else {
+                row.classList.add('error');
+                // Réinitialiser les mauvaises réponses après l'animation
+                setTimeout(() => {
+                    row.querySelectorAll('.complete-select.wrong').forEach(select => {
+                        select.classList.remove('wrong');
+                        select.value = '';
+                    });
+                    row.classList.remove('error');
+                }, 600);
+            }
+        });
+        
+        // Vérifier si tout est validé
+        const totalRows = zoneExercice.querySelectorAll('.complete-row').length;
+        const validatedRows = zoneExercice.querySelectorAll('.complete-row.validated').length;
+        
+        if (!toutRempli) {
+            messageDiv.innerHTML = creerMessageFeedback('warning', '⚠️ Complète tous les trous avant de vérifier !');
+        } else if (validatedRows === totalRows) {
+            messageDiv.innerHTML = creerMessageFeedback('success', '🎉 Perfect! Tu as terminé tous les exercices !');
+            exerciceTermine = true;
+            setTimeout(() => btnContinuer.style.display = 'block', 400);
+        } else if (toutCorrect) {
+            messageDiv.innerHTML = creerMessageFeedback('success', '🎉 Perfect! Tu as terminé tous les exercices !');
+            exerciceTermine = true;
+            setTimeout(() => btnContinuer.style.display = 'block', 400);
+        } else {
+            messageDiv.innerHTML = creerMessageFeedback('error', '❌ Certaines réponses sont incorrectes, essaye encore !');
+        }
+    });
+}
+
 /* ============================================================
    7. FONCTIONS UTILITAIRES
    ============================================================ */
@@ -2016,11 +2356,11 @@ function changerPersonnage(type) {
     const nomEl = document.getElementById('nomPersonnage');
     
     if (type === 'koala') {
-        persoEl.querySelector('img').src = 'assets/koala.png';
+        persoEl.querySelector('img').src = 'assets/koala.jpg';
         persoEl.querySelector('img').alt = 'Professeur Panda';
         nomEl.textContent = 'Professeur Panda';
     } else {
-        persoEl.querySelector('img').src = 'assets/cat.png';
+        persoEl.querySelector('img').src = 'assets/cat.jpg';
         persoEl.querySelector('img').alt = 'Monsieur Chat';
         nomEl.textContent = 'Monsieur Chat';
     }
@@ -2041,7 +2381,7 @@ function createSpeakerFloat(nom, texte, type = 'chat') {
     wrapper.className = 'speaker-float';
     
     // Créer l'avatar selon le type
-    const imgSrc = type === 'koala' ? 'assets/koala.png' : 'assets/cat.png';
+    const imgSrc = type === 'koala' ? 'assets/koala.jpg' : 'assets/cat.jpg';
     const imgAlt = type === 'koala' ? 'Professeur Panda' : 'Monsieur Chat';
     
     wrapper.innerHTML = `

@@ -288,24 +288,23 @@ body::before {
     width: 100%;
 }
 
-/* Message de bienvenue en sticky */
+/* Message de bienvenue en haut à gauche */
 .titre-bienvenue {
     color: #fff;
-    font-size: 2.2em;
-    margin-bottom: 60px;
+    font-size: 1.8em;
+    margin-bottom: 20px;
     text-shadow: 
         2px 2px 0px #689f38,
         -1px -1px 0px #689f38,
         3px 3px 10px rgba(0, 0, 0, 0.3);
-    position: sticky;
-    top: 110px;
-    z-index: 10;
+    position: fixed;
+    top: 15px;
+    left: 20px;
+    z-index: 1999;
     background: linear-gradient(135deg, rgba(139, 195, 74, 0.9) 0%, rgba(104, 159, 56, 0.9) 100%);
-    padding: 15px 30px;
+    padding: 12px 25px;
     border-radius: 20px;
     backdrop-filter: blur(10px);
-    margin-inline: auto;
-    max-width: fit-content;
     border: 3px solid #fff;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
@@ -351,8 +350,8 @@ body::before {
 /* Tailles selon le type de niveau */
 .niveau-exercice { width: 175px; height: 175px; font-size: 1.5em; }
 .niveau-cours    { width: 120px; height: 120px; font-size: 1.2em; }
-.niveau-ritual,
-.niveau-evaluation { width: 160px; height: 160px; font-size: 1.8em; }
+.niveau-ritual { width: 160px; height: 160px; font-size: 1.8em; }
+.niveau-evaluation { width: 200px; height: 200px; font-size: 2em; }
 
 /* Couleurs spécifiques */
 .niveau-cours:not(.niveau-complete):not(.niveau-verrouille) {
@@ -399,8 +398,8 @@ body::before {
 /* Éléments internes des niveaux */
 .numero-niveau { font-size: 3em; }
 .niveau-cours .numero-niveau { font-size: 2em; }
-.niveau-evaluation .numero-niveau,
 .niveau-ritual .numero-niveau { font-size: 2.8em; }
+.niveau-evaluation .numero-niveau { font-size: 3.2em; }
 
 .nom-niveau { 
     font-size: 1em; 
@@ -633,9 +632,9 @@ body::before {
 }
 
 .speaker-float .personnage-dialogue img {
-    width: 85%;
-    height: 85%;
-    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 /* Bouton toggle pour réduire/agrandir la bulle */
@@ -709,9 +708,9 @@ body::before {
 
 /* Image du koala avec espace pour les contours */
 .speaker-float.speaker-accueil .personnage-dialogue img {
-    width: 85%;
-    height: 85%;
-    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .speaker-float .bubble::before {
@@ -791,9 +790,9 @@ body::before {
 }
 
 .koala-message-box .personnage-dialogue img {
-    width: 85%;
-    height: 85%;
-    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .koala-message-box .bubble {
@@ -1386,40 +1385,42 @@ body::before {
 }
 
 .ampm-choice {
-    width: 55px;
-    height: 55px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
-    border: 3px solid transparent;
-    background: rgba(255, 255, 255, 0.3);
+    border: 3px solid rgba(139, 195, 74, 0.5);
+    background: rgba(255, 255, 255, 0.8);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
     padding: 8px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
 }
 
 .ampm-choice img {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    opacity: 0.5;
+    opacity: 0.85;
     transition: opacity 0.2s ease;
 }
 
 .ampm-choice:hover {
-    transform: scale(1.1);
-    background: rgba(255, 255, 255, 0.5);
+    transform: scale(1.15);
+    background: rgba(255, 255, 255, 1);
+    border-color: #8bc34a;
 }
 
 .ampm-choice:hover img {
-    opacity: 0.8;
+    opacity: 1;
 }
 
 .ampm-choice.selected {
     border-color: #8bc34a;
-    background: rgba(102, 126, 234, 0.2);
-    box-shadow: 0 0 15px rgba(102, 126, 234, 0.4);
+    background: rgba(139, 195, 74, 0.2);
+    box-shadow: 0 0 15px rgba(139, 195, 74, 0.5);
 }
 
 .ampm-choice.selected img {
@@ -1560,6 +1561,182 @@ body::before {
     flex-direction: column;
     gap: 20px;
     padding: 10px;
+}
+
+/* --- EXERCICE 3.2 : Choix de traduction AM/PM --- */
+.traduction-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 10px;
+}
+
+.traduction-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.traduction-french {
+    font-weight: bold;
+    color: #fff;
+    font-size: 1.05em;
+    padding: 12px 15px;
+    background: linear-gradient(135deg, #8bc34a 0%, #689f38 100%);
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(139, 195, 74, 0.3);
+    border: 2px solid #fff;
+}
+
+.traduction-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.traduction-choice {
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.85);
+    border: 3px solid rgba(139, 195, 74, 0.3);
+    border-radius: 10px;
+    font-size: 0.95em;
+    color: #2c3e50;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.traduction-choice:hover {
+    background: rgba(255, 255, 255, 1);
+    border-color: #8bc34a;
+    transform: scale(1.02);
+}
+
+.traduction-choice.selected {
+    border-color: #8bc34a;
+    background: rgba(139, 195, 74, 0.25);
+    font-weight: bold;
+}
+
+.traduction-choice.correct {
+    border-color: #27ae60;
+    background: rgba(39, 174, 96, 0.25);
+    color: #27ae60;
+    font-weight: bold;
+}
+
+.traduction-choice.wrong {
+    border-color: #e74c3c;
+    background: rgba(231, 76, 60, 0.25);
+    color: #e74c3c;
+    animation: wrongShake 420ms ease;
+}
+
+.traduction-row.validated .traduction-choice:not(.correct) {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.traduction-row.error {
+    background: rgba(231, 76, 60, 0.15);
+}
+
+/* --- EXERCICE 3.3 : Compléter les phrases avec listes déroulantes --- */
+.complete-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 10px;
+}
+
+.complete-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.complete-french {
+    font-weight: bold;
+    color: #fff;
+    font-size: 1em;
+    padding: 10px 15px;
+    background: linear-gradient(135deg, #8bc34a 0%, #689f38 100%);
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(139, 195, 74, 0.3);
+    border: 2px solid #fff;
+}
+
+.complete-english {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 10px;
+    font-size: 0.95em;
+    color: #2c3e50;
+    line-height: 2;
+    justify-content: center;
+}
+
+.complete-english span {
+    white-space: nowrap;
+}
+
+.complete-select {
+    padding: 6px 10px;
+    font-size: 0.95em;
+    font-family: 'Sour Gummy', sans-serif;
+    font-weight: bold;
+    border: 3px solid #8bc34a;
+    border-radius: 8px;
+    background: #fff;
+    color: #2c3e50;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 100px;
+    text-align: center;
+}
+
+.complete-select:hover {
+    border-color: #689f38;
+    background: rgba(139, 195, 74, 0.1);
+}
+
+.complete-select:focus {
+    outline: none;
+    border-color: #689f38;
+    box-shadow: 0 0 8px rgba(139, 195, 74, 0.4);
+}
+
+.complete-select.correct {
+    border-color: #27ae60;
+    background: rgba(39, 174, 96, 0.2);
+    color: #27ae60;
+}
+
+.complete-select.wrong {
+    border-color: #e74c3c;
+    background: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+    animation: wrongShake 420ms ease;
+}
+
+.complete-row.validated .complete-select {
+    pointer-events: none;
+}
+
+.complete-row.error {
+    background: rgba(231, 76, 60, 0.15);
 }
 
 .frise-timeline {
@@ -1812,6 +1989,13 @@ body::before {
     box-shadow: 0 6px 15px rgba(102, 126, 234, 0.3);
 }
 
+.drag-image.selected {
+    border-color: #ff9a56;
+    background: rgba(255, 154, 86, 0.3);
+    transform: scale(1.1);
+    box-shadow: 0 5px 20px rgba(255, 154, 86, 0.5);
+}
+
 .drag-image.dragging {
     opacity: 0.5;
     cursor: grabbing;
@@ -2051,6 +2235,11 @@ body::before {
     
     /* Exercice 2.2 en une colonne sur mobile */
     .audio-ampm-container {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Exercice 3.2 en une colonne sur mobile */
+    .traduction-container {
         grid-template-columns: 1fr;
     }
 }
