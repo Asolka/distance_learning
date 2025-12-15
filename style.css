@@ -1,31 +1,69 @@
-/* ============================================================
-   ENGLISH QUEST - Feuille de styles principale
-   ============================================================
-   Table des matières :
-   1. Variables & Reset
-   2. Body & Fond animé
-   3. Page d'accueil
-   4. Carte de progression (niveaux)
-   5. Boîte de dialogue
-   6. Zone exercices (Ritual, Matching, etc.)
-   7. Animations
-   8. Media queries (responsive)
-   ============================================================ */
+/**
+ * ============================================================
+ * ENGLISH QUEST - Feuille de styles principale
+ * ============================================================
+ * Application d'apprentissage de l'anglais pour élèves de CE2
+ * 
+ * TABLE DES MATIÈRES :
+ * ------------------------------------------------------------
+ * 1. RESET & BASE
+ *    - Import police Sour Gummy
+ *    - Reset CSS
+ *    - Body et fond
+ * 
+ * 2. ÉCRAN DE CHARGEMENT
+ *    - Logo animé
+ *    - Barre de progression
+ * 
+ * 3. PAGE D'ACCUEIL
+ *    - Titre et formulaire
+ *    - Bouton Play
+ * 
+ * 4. CARTE DE PROGRESSION
+ *    - Niveaux (actif, verrouillé, complété)
+ *    - Chemins SVG
+ * 
+ * 5. BOÎTE DE DIALOGUE
+ *    - Avatar personnage
+ *    - Bulle de dialogue
+ *    - Zone exercices
+ * 
+ * 6. SPEAKER FLOTTANT
+ *    - Position fixe
+ *    - Animation bulle
+ * 
+ * 7. EXERCICES
+ *    - Ritual (date/météo)
+ *    - Leçons
+ *    - Exercices 1.x, 2.x, 3.x
+ *    - Encadré éléments
+ * 
+ * 8. ANIMATIONS
+ *    - Keyframes
+ *    - Transitions
+ * 
+ * 9. RESPONSIVE
+ *    - Tablettes (≤1024px)
+ *    - Mobiles (≤768px)
+ *    - Petits écrans (≤480px)
+ * ============================================================
+ */
 
 /* ============================================================
-   1. VARIABLES & RESET
+   1. RESET & BASE
    ============================================================ */
+
+/** Import de la police ludique */
 @import url('https://fonts.googleapis.com/css2?family=Sour+Gummy:wght@400;700&display=swap');
 
+/** Reset CSS */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* ============================================================
-   2. BODY & FOND ANIMÉ
-   ============================================================ */
+/** Corps de page avec fond nature */
 body {
     font-family: 'Sour Gummy', sans-serif;
     min-height: 100vh;
@@ -36,7 +74,7 @@ body {
     position: relative;
 }
 
-/* Image de fond avec flou */
+/** Image de fond avec effet flou */
 body::before {
     content: '';
     position: fixed;
@@ -47,7 +85,7 @@ body::before {
 }
 
 /* ============================================================
-   ÉCRAN DE CHARGEMENT
+   2. ÉCRAN DE CHARGEMENT
    ============================================================ */
 .loading-screen {
     position: fixed;
@@ -458,9 +496,9 @@ body::before {
 /* Wrapper contenant personnage + bulle */
 .dialogue-wrapper {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 20px;
-    max-width: 90%;
+    max-width: 95%;
     animation: monterDialogue 0.5s ease-out;
 }
 
@@ -505,8 +543,8 @@ body::before {
     border-radius: 25px;
     padding: 30px;
     padding-top: 60px;
-    width: 100%;
-    max-width: 820px;
+    width: 600px;
+    min-height: 400px;
     box-shadow: 0 10px 50px rgba(0, 0, 0, 0.2);
 }
 
@@ -835,6 +873,12 @@ body::before {
     max-height: 65vh;
     min-height: 300px;
     overflow-y: auto;
+}
+
+/* Taille fixe pour la dialogue-box */
+.dialogue-box {
+    width: 600px;
+    flex-shrink: 0;
 }
 
 /* Scrollbar personnalisée */
@@ -1739,9 +1783,226 @@ body::before {
     background: rgba(231, 76, 60, 0.15);
 }
 
+/* --- EXERCICE 3.1 : Ordre des images selon audio --- */
+.ordre-container {
+    display: flex;
+    gap: 20px;
+    padding: 10px;
+}
+
+/* Encadré séparé pour les éléments à placer */
+.elements-box {
+    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+    border: 4px solid #ff9a56;
+    border-radius: 20px;
+    padding: 20px 15px;
+    width: 180px;
+    flex-shrink: 0;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    max-height: 70vh;
+    overflow-y: auto;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+}
+
+.elements-title {
+    font-weight: bold;
+    color: #ff6b6b;
+    font-size: 1.1em;
+    margin-bottom: 15px;
+    text-align: center;
+    padding-bottom: 10px;
+    border-bottom: 2px dashed #ff9a56;
+}
+
+.elements-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    flex: 1;
+}
+
+.elements-content .fill-labels {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.elements-content .fill-label {
+    width: 100%;
+    text-align: center;
+}
+
+.elements-content .drag-images-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    min-height: auto;
+    background: none;
+    padding: 0;
+    border-radius: 0;
+    flex: 1;
+    align-content: flex-start;
+}
+
+.elements-content .drag-image {
+    width: 70px;
+    height: 70px;
+}
+
+.elements-content .frise-hours-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+}
+
+.elements-content .frise-hour {
+    width: 100%;
+    text-align: center;
+}
+
+.elements-content .ordre-images-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    min-height: auto;
+    background: none;
+    padding: 0;
+    border-radius: 0;
+    flex: 1;
+    align-content: flex-start;
+}
+
+.elements-content .ordre-image {
+    width: 65px;
+    height: 65px;
+}
+
+.ordre-audios {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: fit-content;
+}
+
+.ordre-audio-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 10px;
+    width: fit-content;
+}
+
+.ordre-audio-row .audio-btn {
+    width: 45px;
+    height: 45px;
+    flex-shrink: 0;
+}
+
+.ordre-drop-zones {
+    display: flex;
+    gap: 8px;
+}
+
+.ordre-drop-zone {
+    width: 60px;
+    height: 60px;
+    border: 3px dashed rgba(139, 195, 74, 0.5);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+    transition: all 0.2s ease;
+}
+
+.ordre-drop-zone.has-image {
+    border-style: solid;
+    border-color: #8bc34a;
+}
+
+.ordre-drop-zone.correct {
+    border-color: #27ae60;
+    background: rgba(39, 174, 96, 0.2);
+}
+
+.ordre-drop-zone.wrong {
+    border-color: #e74c3c;
+    background: rgba(231, 76, 60, 0.2);
+    animation: wrongShake 420ms ease;
+}
+
+.ordre-drop-zone img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+}
+
+.ordre-images-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    min-height: 100px;
+    align-content: flex-start;
+}
+
+.ordre-image {
+    width: 70px;
+    height: 70px;
+    background: white;
+    border: 3px solid #8bc34a;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    padding: 5px;
+}
+
+.ordre-image:hover {
+    transform: scale(1.1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.ordre-image.selected {
+    border-color: #ff9a56;
+    background: rgba(255, 154, 86, 0.2);
+    transform: scale(1.1);
+    box-shadow: 0 5px 20px rgba(255, 154, 86, 0.5);
+}
+
+.ordre-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.ordre-audio-row.validated .ordre-drop-zone {
+    pointer-events: none;
+}
+
+.ordre-audio-row.error {
+    background: rgba(231, 76, 60, 0.15);
+}
+
 .frise-timeline {
     display: flex;
-    height: 120px;
+    min-height: 120px;
+    height: auto;
     border-radius: 15px;
     overflow: hidden;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
@@ -1753,9 +2014,10 @@ body::before {
     display: flex;
     flex-wrap: wrap;
     align-content: flex-start;
-    padding: 10px;
+    padding: 15px;
+    padding-bottom: 50px;
     gap: 8px;
-    min-height: 100px;
+    min-height: 120px;
     transition: all 0.2s ease;
 }
 
@@ -1832,6 +2094,13 @@ body::before {
 .frise-hour.dragging {
     opacity: 0.5;
     cursor: grabbing;
+}
+
+.frise-hour.selected {
+    border-color: #ff9a56;
+    background: rgba(255, 154, 86, 0.3);
+    transform: scale(1.1);
+    box-shadow: 0 5px 20px rgba(255, 154, 86, 0.5);
 }
 
 .frise-hour.correct {
@@ -2172,74 +2441,320 @@ body::before {
     }
 }
 
+/* Tablettes */
+@media (max-width: 1024px) {
+    .dialogue-box {
+        width: 500px;
+    }
+    
+    .elements-box {
+        width: 160px;
+        padding: 15px 10px;
+    }
+    
+    .elements-content .drag-image,
+    .elements-content .ordre-image {
+        width: 55px;
+        height: 55px;
+    }
+}
+
 /* Mobiles */
 @media (max-width: 768px) {
-    .titre-principal { font-size: 2.5em; }
-
-    .personnage-dialogue {
-        width: 150px;
-        height: 150px;
-        font-size: 4em;
+    .titre-principal { font-size: 2em; }
+    
+    /* Cacher le header logo sur mobile pour plus d'espace */
+    .header-logo {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .welcome-prenom {
+        font-size: 1.4em;
+        padding: 8px 15px;
     }
 
-    .dialogue-wrapper { flex-direction: column; }
+    .personnage-dialogue {
+        width: 120px;
+        height: 120px;
+        font-size: 3em;
+    }
 
-    .date-selecteurs { gap: 5px; }
+    .dialogue-wrapper { 
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .dialogue-box {
+        width: 95vw;
+        max-width: 95vw;
+        padding: 15px;
+    }
+    
+    .zone-exercice {
+        padding: 15px;
+        max-height: 50vh;
+    }
+    
+    /* Encadré des éléments en bas sur mobile */
+    .elements-box {
+        width: 95vw;
+        max-width: 95vw;
+        max-height: none;
+        padding: 15px;
+        order: 1;
+    }
+    
+    .elements-content {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .elements-content .fill-labels {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .elements-content .fill-label {
+        width: auto;
+    }
+    
+    .elements-content .frise-hours-container {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .elements-content .frise-hour {
+        width: auto;
+    }
+    
+    .elements-content .drag-image,
+    .elements-content .ordre-image {
+        width: 50px;
+        height: 50px;
+    }
+
+    .date-selecteurs { 
+        gap: 5px;
+        flex-wrap: wrap;
+    }
     .date-selecteurs select {
-        font-size: 1em;
+        font-size: 0.95em;
         padding: 8px 10px;
+        min-width: 70px;
     }
 
     .meteo-option {
-        width: 80px;
+        width: 70px;
         padding: 6px;
     }
     .meteo-option img {
-        width: 48px;
-        height: 48px;
+        width: 40px;
+        height: 40px;
     }
-    .meteo-label { font-size: 0.85em; }
-}
-
-/* Très petits écrans (speaker float) */
-@media (max-width: 600px) {
-    .speaker-float {
-        left: 12px;
-        bottom: 12px;
-    }
-    .speaker-float .personnage-dialogue {
-        width: 110px;
-        height: 110px;
-    }
-    .speaker-float .bubble {
-        max-width: 320px;
-        padding: 12px 14px;
-    }
-    .speaker-float .nom-personnage { font-size: 1.4em; }
-    .speaker-float .texte-dialogue { font-size: 1.05em; }
+    .meteo-label { font-size: 0.8em; }
     
-    /* Exercice 1.2 en une colonne sur mobile */
-    .fill-container {
-        grid-template-columns: 1fr;
-    }
-    
-    /* Exercice 2.1 en une colonne sur mobile */
-    .ampm-container {
-        grid-template-columns: 1fr;
-    }
-    
-    /* Exercice 1.3 en une colonne sur mobile */
-    .audio-match-container {
-        grid-template-columns: 1fr;
-    }
-    
-    /* Exercice 2.2 en une colonne sur mobile */
-    .audio-ampm-container {
-        grid-template-columns: 1fr;
-    }
-    
-    /* Exercice 3.2 en une colonne sur mobile */
+    /* Exercices en une colonne */
+    .fill-container,
+    .ampm-container,
+    .audio-match-container,
+    .audio-ampm-container,
     .traduction-container {
         grid-template-columns: 1fr;
+    }
+    
+    /* Réduire les éléments des exercices */
+    .fill-phrase {
+        padding: 12px;
+    }
+    
+    .audio-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1em;
+    }
+    
+    .drop-zone {
+        height: 70px;
+        min-height: 70px;
+    }
+    
+    .drag-image {
+        width: 55px;
+        height: 55px;
+    }
+    
+    /* Frise chronologique plus compacte */
+    .frise-timeline {
+        min-height: 100px;
+    }
+    
+    .frise-side {
+        padding: 10px;
+        padding-bottom: 40px;
+    }
+    
+    .frise-hour {
+        padding: 6px 10px;
+        font-size: 0.85em;
+    }
+    
+    /* Exercice 3.1 compact */
+    .ordre-audio-row {
+        padding: 8px;
+    }
+    
+    .ordre-audio-row .audio-btn {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .ordre-drop-zone {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .ordre-drop-zone img {
+        width: 40px;
+        height: 40px;
+    }
+    
+    /* Boutons */
+    .bouton-continuer,
+    .ampm-verify-btn {
+        padding: 12px 25px;
+        font-size: 1.1em;
+    }
+    
+    /* Leçons */
+    .lesson-content h3 {
+        font-size: 1.3em;
+    }
+    
+    .example-comparison {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+/* Très petits écrans (iPhone SE, etc.) */
+@media (max-width: 480px) {
+    .titre-principal { font-size: 1.6em; }
+    
+    .header-logo {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .welcome-prenom {
+        font-size: 1.2em;
+        padding: 6px 12px;
+        top: 10px;
+        left: 10px;
+    }
+    
+    .personnage-dialogue {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .dialogue-box {
+        padding: 12px;
+    }
+    
+    .zone-exercice {
+        padding: 10px;
+        margin: 10px 0;
+    }
+    
+    .elements-box {
+        padding: 12px;
+    }
+    
+    .elements-title {
+        font-size: 1em;
+        margin-bottom: 10px;
+    }
+    
+    .speaker-float {
+        left: 8px;
+        bottom: 8px;
+    }
+    .speaker-float .personnage-dialogue {
+        width: 90px;
+        height: 90px;
+    }
+    .speaker-float .bubble {
+        max-width: 250px;
+        padding: 10px 12px;
+    }
+    .speaker-float .nom-personnage { font-size: 1.2em; }
+    .speaker-float .texte-dialogue { font-size: 0.95em; }
+    
+    /* Exercices très compacts */
+    .fill-english, .fill-french {
+        font-size: 0.9em;
+    }
+    
+    .fill-label {
+        padding: 8px 12px;
+        font-size: 0.9em;
+    }
+    
+    .ampm-item {
+        padding: 10px;
+    }
+    
+    .ampm-time {
+        font-size: 1.3em;
+    }
+    
+    .sun-moon-icon {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .sun-moon-icon img {
+        width: 30px;
+        height: 30px;
+    }
+    
+    /* Exercice 3.2 et 3.3 */
+    .traduction-item,
+    .complete-row {
+        padding: 10px;
+    }
+    
+    .traduction-french,
+    .complete-french {
+        font-size: 0.9em;
+        padding: 8px;
+    }
+    
+    .traduction-choice {
+        padding: 8px 10px;
+        font-size: 0.85em;
+    }
+    
+    .complete-select {
+        padding: 6px 8px;
+        font-size: 0.9em;
+    }
+    
+    /* Boutons plus petits */
+    .bouton-continuer,
+    .ampm-verify-btn {
+        padding: 10px 20px;
+        font-size: 1em;
+    }
+    
+    .bouton-retour {
+        width: 35px;
+        height: 35px;
+        font-size: 1.3em;
     }
 }

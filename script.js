@@ -1,34 +1,80 @@
-/* ============================================================
-   ENGLISH QUEST - Script principal
-   ============================================================
-   Table des matières :
-   1. Variables globales & configuration
-   2. Initialisation (événements DOM)
-   3. Gestion des niveaux (génération, chemins SVG)
-   4. Dialogue & navigation
-   5. Ritual (date + météo)
-   6. Exercices (matching, etc.)
-   7. Fonctions utilitaires
-   ============================================================ */
+/**
+ * ============================================================
+ * ENGLISH QUEST - Script principal
+ * ============================================================
+ * Application d'apprentissage de l'anglais pour élèves de CE2
+ * 
+ * TABLE DES MATIÈRES :
+ * ------------------------------------------------------------
+ * 1. CONFIGURATION & VARIABLES GLOBALES
+ *    - État du joueur
+ *    - Configuration des niveaux
+ *    - Traductions
+ * 
+ * 2. INITIALISATION
+ *    - Écran de chargement
+ *    - Événements DOM
+ *    - Speaker d'accueil
+ * 
+ * 3. GESTION DES NIVEAUX
+ *    - Génération de la carte
+ *    - Chemins SVG
+ *    - Navigation
+ * 
+ * 4. SYSTÈME ADMIN (Code Konami)
+ * 
+ * 5. DIALOGUES & LEÇONS
+ *    - Affichage des personnages
+ *    - Contenu des leçons
+ * 
+ * 6. RITUAL (Date & Météo)
+ * 
+ * 7. EXERCICES
+ *    - 1.1 : Matching images/phrases
+ *    - 1.2 : Texte à trous (verbes)
+ *    - 1.3 : Audio + images
+ *    - 2.1 : AM/PM avec soleil/lune
+ *    - 2.2 : Audio AM/PM
+ *    - 2.3 : Frise chronologique
+ *    - 3.1 : Ordre images selon audio
+ *    - 3.2 : Choix traduction AM/PM
+ *    - 3.3 : Compléter phrases
+ * 
+ * 8. FONCTIONS UTILITAIRES
+ *    - Shuffle (mélange tableau)
+ *    - TypeWriter (effet machine à écrire)
+ *    - Messages de feedback
+ *    - Speaker flottant
+ * ============================================================
+ */
+
+"use strict";
 
 /* ============================================================
-   1. VARIABLES GLOBALES & CONFIGURATION
+   1. CONFIGURATION & VARIABLES GLOBALES
    ============================================================ */
 
-// État du joueur
+/** État du joueur */
 let nomJoueur = '';
 let niveauxCompletes = [];
 let niveauActuel = 0;
 let exerciceTermine = false;
 
-// Mode admin (débloque tout)
+/** Mode admin (débloqué via Code Konami) */
 let modeAdmin = false;
 let konamiIndex = 0;
 const KONAMI_CODE = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
 
 /* ============================================================
-   ÉCRAN DE CHARGEMENT
+   2. INITIALISATION - Écran de chargement
    ============================================================ */
+
+/**
+ * Animation de l'écran de chargement au démarrage
+ * - Barre de progression sur 2 secondes
+ * - Animation du logo vers le header
+ * - Transition vers l'application
+ */
 window.addEventListener('load', () => {
     const loadingScreen = document.getElementById('loadingScreen');
     const loadingBar = document.getElementById('loadingBar');
@@ -71,24 +117,27 @@ window.addEventListener('load', () => {
     }, interval);
 });
 
-// Configuration des niveaux du jeu
+/**
+ * Configuration des niveaux du parcours
+ * Types : ritual, cours, exercice, evaluation
+ */
 const niveaux = [
-    // Ritual d'ouverture
+    // Ritual d'ouverture (date du jour)
     { id: 0, type: 'ritual', nom: 'Ritual', emoji: '📅' },
     
-    // Bloc 1 : Lesson + Exercices
+    // Bloc 1 : La vie quotidienne
     { id: 1, type: 'cours', nom: 'Lesson 1', emoji: '📖' },
     { id: 2, type: 'exercice', nom: 'Exercise 1.1', emoji: '✏️' },
     { id: 3, type: 'exercice', nom: 'Exercise 1.2', emoji: '✏️' },
     { id: 4, type: 'exercice', nom: 'Exercise 1.3', emoji: '✏️' },
     
-    // Bloc 2
+    // Bloc 2 : L'heure en anglais (AM/PM)
     { id: 5, type: 'cours', nom: 'Lesson 2', emoji: '📖' },
     { id: 6, type: 'exercice', nom: 'Exercise 2.1', emoji: '✏️' },
     { id: 7, type: 'exercice', nom: 'Exercise 2.2', emoji: '✏️' },
     { id: 8, type: 'exercice', nom: 'Exercise 2.3', emoji: '✏️' },
     
-    // Bloc 3
+    // Bloc 3 : Mélange vie quotidienne + heures
     { id: 9, type: 'cours', nom: 'Lesson 3', emoji: '📖' },
     { id: 10, type: 'exercice', nom: 'Exercise 3.1', emoji: '✏️' },
     { id: 11, type: 'exercice', nom: 'Exercise 3.2', emoji: '✏️' },
@@ -98,34 +147,37 @@ const niveaux = [
     { id: 13, type: 'evaluation', nom: 'Evaluation', emoji: '🏆' }
 ];
 
-// Traductions pour la date
+/** Traductions pour le ritual de la date */
 const JOURS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const MOIS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 /* ============================================================
-   2. INITIALISATION (ÉVÉNEMENTS DOM)
+   2. INITIALISATION - Événements DOM
    ============================================================ */
 
-// Références aux éléments DOM
+/** Références aux éléments du formulaire d'accueil */
 const inputPrenom = document.getElementById('inputPrenom');
 const btnCommencer = document.getElementById('btnCommencer');
 
-// Active/désactive le bouton selon le contenu du champ
+/** Active le bouton Play quand le prénom est saisi */
 inputPrenom.addEventListener('input', (e) => {
     btnCommencer.disabled = e.target.value.trim().length === 0;
 });
 
-// Permet de valider avec Entrée
+/** Validation avec la touche Entrée */
 inputPrenom.addEventListener('keypress', (e) => {
     if (e.key === 'Enter' && inputPrenom.value.trim()) {
         commencerJeu();
     }
 });
 
-// Clic sur le bouton "Play!"
+/** Clic sur le bouton Play */
 btnCommencer.addEventListener('click', commencerJeu);
 
-// Initialiser le speaker de la page d'accueil
+/**
+ * Initialise le speaker d'accueil (Professeur Panda)
+ * avec effet machine à écrire
+ */
 document.addEventListener('DOMContentLoaded', () => {
     const texteAccueil = document.getElementById('texteAccueil');
     const toggleAccueil = document.getElementById('toggleAccueil');
@@ -429,6 +481,10 @@ function afficherDialogue(niveauId) {
     const zoneExercice = document.getElementById('zoneExercice');
     const btnContinuer = document.getElementById('btnContinuer');
     const dialogueBox = document.querySelector('.dialogue-box');
+    const elementsBox = document.getElementById('elementsBox');
+    
+    // Cacher l'encadré des éléments par défaut
+    elementsBox.style.display = 'none';
     
     // Ajouter/supprimer bouton skip admin
     let btnSkip = document.querySelector('.btn-skip-admin');
@@ -499,6 +555,8 @@ function afficherDialogue(niveauId) {
                         <p style="text-align: center; font-size: 1.2em; margin-top: 15px;"><strong>Allons-y ! 🚀</strong></p>
                     </div>
                 `;
+                removeSpeakerFloat();
+                createSpeakerFloat('Monsieur Chat', texteDialogue.textContent, 'chat');
             } else if (niveauId === 5) {
                 // Leçon 2 : Lire l'heure en anglais
                 texteDialogue.textContent = `Apprenons ensemble à lire l'heure en anglais !`;
@@ -539,6 +597,8 @@ function afficherDialogue(niveauId) {
                         </div>
                     </div>
                 `;
+                removeSpeakerFloat();
+                createSpeakerFloat('Écureuil Noisette', texteDialogue.textContent, 'ecureuil');
             } else if (niveauId === 9) {
                 // Leçon 3 : Mélange vie quotidienne + heures
                 texteDialogue.textContent = `Voici la dernière leçon !`;
@@ -574,6 +634,8 @@ function afficherDialogue(niveauId) {
                         <p style="text-align: center; font-size: 1.3em; margin-top: 15px;"><strong>C'est parti ! 🚀</strong></p>
                     </div>
                 `;
+                removeSpeakerFloat();
+                createSpeakerFloat('Maître Panda', texteDialogue.textContent, 'panda');
             } else {
                 // Autres leçons : contenu à venir
                 texteDialogue.textContent = `${niveau.nom}. Contenu à venir...`;
@@ -581,65 +643,71 @@ function afficherDialogue(niveauId) {
             }
             btnContinuer.style.display = 'block';
             exerciceTermine = true;
-            removeSpeakerFloat();
         },
         exercice: () => {
             if (niveauId === 2) {
                 // Exercice 1.1 : matching mots/images
-                texteDialogue.textContent = `Premier exercice: tu as des images d'actions d'une journée, et les phrases en anglais. Relie la bonne phrase avec la bonne image, à toi de jouer !`;
+                texteDialogue.textContent = `${nomJoueur}, voici ton premier exercice ! Tu as des images d'actions d'une journée, et les phrases en anglais. Relie la bonne phrase avec la bonne image, à toi de jouer !`;
                 afficherExercice1_1();
                 exerciceTermine = false;
                 removeSpeakerFloat();
                 createSpeakerFloat('Monsieur Chat', texteDialogue.textContent, 'chat');
             } else if (niveauId === 3) {
                 // Exercice 1.2 : texte à trous
-                texteDialogue.textContent = `Deuxième exercice: lis les phrases en anglais et complète la traduction française avec le bon verbe. Clique sur une étiquette puis sur le trou pour la placer !`;
+                texteDialogue.textContent = `Super ${nomJoueur} ! Deuxième exercice : lis les phrases en français et complète la traduction anglaise avec le bon verbe. Clique sur une étiquette puis sur le trou pour la placer !`;
                 afficherExercice1_2();
                 exerciceTermine = false;
                 removeSpeakerFloat();
                 createSpeakerFloat('Monsieur Chat', texteDialogue.textContent, 'chat');
             } else if (niveauId === 4) {
                 // Exercice 1.3 : drag & drop audio
-                texteDialogue.textContent = `Troisième exercice: écoute les phrases en anglais en cliquant sur le bouton, puis fais glisser la bonne image vers le son correspondant !`;
+                texteDialogue.textContent = `Bravo ${nomJoueur} ! Troisième exercice : écoute les phrases en anglais en cliquant sur le bouton, puis clique sur la bonne image pour la placer !`;
                 afficherExercice1_3();
                 exerciceTermine = false;
                 removeSpeakerFloat();
                 createSpeakerFloat('Monsieur Chat', texteDialogue.textContent, 'chat');
             } else if (niveauId === 6) {
                 // Exercice 2.1 : AM/PM soleil/lune
-                texteDialogue.textContent = `Voyons ensemble si tu as bien compris. Voici un premier exercice ! Tu as des heures anglaises et deux images : un soleil (pour le matin), et une lune (pour l'après-midi). Clique sur la bonne image en fonction de l'heure, est-ce le matin ou l'après-midi ?`;
+                texteDialogue.textContent = `${nomJoueur}, voyons ensemble si tu as bien compris ! Tu as des heures anglaises et deux images : un soleil (pour le matin), et une lune (pour l'après-midi). Clique sur la bonne image en fonction de l'heure !`;
                 afficherExercice2_1();
                 exerciceTermine = false;
                 removeSpeakerFloat();
-                createSpeakerFloat('Monsieur Chat', texteDialogue.textContent, 'chat');
+                createSpeakerFloat('Écureuil Noisette', texteDialogue.textContent, 'ecureuil');
             } else if (niveauId === 7) {
                 // Exercice 2.2 : Audio AM/PM
-                texteDialogue.textContent = `Augmente le son de ton appareil numérique et sois attentif ! Voyons ensemble si tu as compris la différence entre heure française et heure anglaise. Tu vas entendre des phrases françaises (avec l'heure en français!). Tu as ensuite des cases avec les abréviations AM et PM. À toi de cocher la bonne case en fonction de ce que tu entends en français !`;
+                texteDialogue.textContent = `${nomJoueur}, augmente le son ! Tu vas entendre des phrases françaises avec l'heure. Tu as des cases AM et PM. À toi de cocher la bonne case en fonction de ce que tu entends !`;
                 afficherExercice2_2();
                 exerciceTermine = false;
                 removeSpeakerFloat();
-                createSpeakerFloat('Monsieur Chat', texteDialogue.textContent, 'chat');
+                createSpeakerFloat('Écureuil Noisette', texteDialogue.textContent, 'ecureuil');
             } else if (niveauId === 8) {
                 // Exercice 2.3 : Frise chronologique
-                texteDialogue.textContent = `Associons les heures anglaises au temps de la journée ! Regarde bien la frise devant toi. Elle est séparée en deux avec un côté AM et un côté PM ! Tu as des petites vignettes avec l'heure anglaise. À toi de placer les heures anglaises au bon endroit sur la frise. Sois le plus précis possible !`;
+                texteDialogue.textContent = `Super ${nomJoueur} ! Regarde bien la frise : elle est séparée en AM et PM. Tu as des vignettes avec l'heure anglaise. Place-les au bon endroit sur la frise !`;
                 afficherExercice2_3();
                 exerciceTermine = false;
                 removeSpeakerFloat();
-                createSpeakerFloat('Monsieur Chat', texteDialogue.textContent, 'chat');
+                createSpeakerFloat('Écureuil Noisette', texteDialogue.textContent, 'ecureuil');
+            } else if (niveauId === 10) {
+                // Exercice 3.1 : Ordre des images selon audio
+                texteDialogue.textContent = `${nomJoueur}, écoute bien et augmente le son ! Tu as des images de la vie quotidienne et des audios en anglais. Remets les images dans l'ordre de l'audio !`;
+                afficherExercice3_1();
+                exerciceTermine = false;
+                removeSpeakerFloat();
+                createSpeakerFloat('Maître Panda', texteDialogue.textContent, 'panda');
             } else if (niveauId === 11) {
                 // Exercice 3.2 : Choix de traduction AM/PM
-                texteDialogue.textContent = `Voici des phrases écrites en français. En dessous, tu as deux versions de la même phrase traduite en anglais. Seulement il y a une différence : AM et PM ! À toi de cocher la bonne traduction, fais bien attention à l'heure !`;
+                texteDialogue.textContent = `${nomJoueur}, voici des phrases en français. En dessous, tu as deux traductions en anglais. Une seule est bonne ! Fais bien attention à AM et PM !`;
                 afficherExercice3_2();
                 exerciceTermine = false;
                 removeSpeakerFloat();
-                createSpeakerFloat('Monsieur Chat', texteDialogue.textContent, 'chat');
+                createSpeakerFloat('Maître Panda', texteDialogue.textContent, 'panda');
             } else if (niveauId === 12) {
                 // Exercice 3.3 : Compléter les phrases
-                texteDialogue.textContent = `Dernier exercice ! Voici des phrases en français. En dessous, tu as la même phrase en anglais. Mais attention ! Il lui manque des mots ! Pour compléter la phrase en anglais, tu as des petites listes avec les mots manquants. À toi de choisir les bons mots au bon endroit. Tu peux t'aider de la phrase en français pour compléter la phrase anglaise.`;
+                texteDialogue.textContent = `Dernier exercice ${nomJoueur} ! Voici des phrases en français. En dessous, la même phrase en anglais avec des mots manquants. Choisis les bons mots dans les listes !`;
                 afficherExercice3_3();
                 exerciceTermine = false;
                 removeSpeakerFloat();
-                createSpeakerFloat('Monsieur Chat', texteDialogue.textContent, 'chat');
+                createSpeakerFloat('Maître Panda', texteDialogue.textContent, 'panda');
             } else {
                 // Exercices non implémentés
                 texteDialogue.textContent = `Exercice ${niveau.nom}. Contenu à venir...`;
@@ -757,6 +825,7 @@ function afficherMessagePanda() {
  */
 function fermerDialogue() {
     document.getElementById('dialogueContainer').style.display = 'none';
+    document.getElementById('elementsBox').style.display = 'none';
     removeSpeakerFloat();
 }
 
@@ -1190,11 +1259,20 @@ function afficherExercice1_2() {
         <div class="fill-container">
             ${phrasesHTML}
         </div>
+        <button class="ampm-verify-btn" id="btnVerifierFill">Vérifier ✓</button>
+        <div id="messageFill" class="message-match"></div>
+    `;
+    
+    // Afficher l'encadré des éléments
+    const elementsBox = document.getElementById('elementsBox');
+    const elementsContent = document.getElementById('elementsContent');
+    const elementsTitle = document.querySelector('.elements-title');
+    elementsBox.style.display = 'block';
+    elementsTitle.textContent = '📦 Verbes';
+    elementsContent.innerHTML = `
         <div class="fill-labels" id="fillLabels">
             ${labelsHTML}
         </div>
-        <button class="ampm-verify-btn" id="btnVerifierFill">Vérifier ✓</button>
-        <div id="messageFill" class="message-match"></div>
     `;
     
     // État de l'exercice
@@ -1202,8 +1280,8 @@ function afficherExercice1_2() {
     const messageDiv = document.getElementById('messageFill');
     const labelsContainer = document.getElementById('fillLabels');
     
-    // Événements sur les étiquettes
-    zoneExercice.querySelectorAll('.fill-label').forEach(label => {
+    // Événements sur les étiquettes (dans elementsContent)
+    elementsContent.querySelectorAll('.fill-label').forEach(label => {
         label.addEventListener('click', () => {
             if (label.classList.contains('used')) return;
             
@@ -1238,7 +1316,7 @@ function afficherExercice1_2() {
             // Si le trou contient déjà un verbe, le remettre dans les étiquettes
             if (gap.textContent) {
                 const oldVerb = gap.textContent;
-                const oldLabel = zoneExercice.querySelector(`.fill-label[data-verb="${oldVerb}"]`);
+                const oldLabel = elementsContent.querySelector(`.fill-label[data-verb="${oldVerb}"]`);
                 if (oldLabel) {
                     oldLabel.classList.remove('used');
                 }
@@ -1365,11 +1443,20 @@ function afficherExercice1_3() {
         <div class="audio-match-container">
             ${rowsHTML}
         </div>
+        <button class="ampm-verify-btn" id="btnVerifierAudio">Vérifier ✓</button>
+        <div id="messageAudioMatch" class="message-match"></div>
+    `;
+    
+    // Afficher l'encadré des éléments
+    const elementsBox = document.getElementById('elementsBox');
+    const elementsContent = document.getElementById('elementsContent');
+    const elementsTitle = document.querySelector('.elements-title');
+    elementsBox.style.display = 'block';
+    elementsTitle.textContent = '📦 Images';
+    elementsContent.innerHTML = `
         <div class="drag-images-container" id="dragImagesContainer">
             ${imagesHTML}
         </div>
-        <button class="ampm-verify-btn" id="btnVerifierAudio">Vérifier ✓</button>
-        <div id="messageAudioMatch" class="message-match"></div>
     `;
     
     // Fixer la hauteur de la zone exercice pour éviter le redimensionnement
@@ -1408,29 +1495,37 @@ function afficherExercice1_3() {
         });
     });
     
-    // Événements sur les images cliquables
-    zoneExercice.querySelectorAll('.drag-image').forEach(img => {
-        img.addEventListener('click', () => {
-            // Ne pas permettre de sélectionner si dans une zone validée (correcte)
-            const parentZone = img.closest('.drop-zone');
-            const parentRow = img.closest('.audio-match-row');
-            if (parentRow && parentRow.classList.contains('validated')) {
-                return;
-            }
-            
-            // Désélectionner l'ancienne image
-            if (selectedImage) {
-                selectedImage.classList.remove('selected');
-            }
-            
-            // Sélectionner ou désélectionner
-            if (selectedImage === img) {
-                selectedImage = null;
-            } else {
-                selectedImage = img;
-                img.classList.add('selected');
-            }
-        });
+    // Fonction pour gérer le clic sur une image
+    function handleImageClick(img) {
+        // Ne pas permettre de sélectionner si dans une zone validée
+        const parentRow = img.closest('.audio-match-row');
+        if (parentRow && parentRow.classList.contains('validated')) {
+            return;
+        }
+        
+        // Désélectionner l'ancienne image
+        if (selectedImage) {
+            selectedImage.classList.remove('selected');
+        }
+        
+        // Sélectionner ou désélectionner
+        if (selectedImage === img) {
+            selectedImage = null;
+        } else {
+            selectedImage = img;
+            img.classList.add('selected');
+        }
+    }
+    
+    // Événements sur les images (utiliser délégation d'événements)
+    elementsContent.addEventListener('click', (e) => {
+        const img = e.target.closest('.drag-image');
+        if (img) handleImageClick(img);
+    });
+    
+    zoneExercice.addEventListener('click', (e) => {
+        const img = e.target.closest('.drag-image');
+        if (img) handleImageClick(img);
     });
     
     // Événements sur les drop zones
@@ -1441,11 +1536,8 @@ function afficherExercice1_3() {
             // Si zone déjà validée, ne rien faire
             if (row && row.classList.contains('validated')) return;
             
-            // Si on clique sur une image dans la zone, on la sélectionne
-            const clickedImage = e.target.closest('.drag-image');
-            if (clickedImage) {
-                return; // L'événement sera géré par le listener de l'image
-            }
+            // Si on clique sur une image dans la zone, ne pas traiter ici
+            if (e.target.closest('.drag-image')) return;
             
             // Si pas d'image sélectionnée, ne rien faire
             if (!selectedImage) return;
@@ -1860,90 +1952,78 @@ function afficherExercice2_3() {
                     <span class="frise-icon frise-icon-pm">🌙</span>
                 </div>
             </div>
-            <div class="frise-hours-container" id="friseHoursContainer">
-                ${hoursHTML}
-            </div>
         </div>
         <button class="ampm-verify-btn" id="btnVerifierFrise">Vérifier ✓</button>
         <div id="messageFrise" class="message-match"></div>
     `;
     
+    // Afficher l'encadré des éléments
+    const elementsBox = document.getElementById('elementsBox');
+    const elementsContent = document.getElementById('elementsContent');
+    const elementsTitle = document.querySelector('.elements-title');
+    elementsBox.style.display = 'block';
+    elementsTitle.textContent = '📦 Heures';
+    elementsContent.innerHTML = `
+        <div class="frise-hours-container" id="friseHoursContainer">
+            ${hoursHTML}
+        </div>
+    `;
+    
     const messageDiv = document.getElementById('messageFrise');
     const hoursContainer = document.getElementById('friseHoursContainer');
     
-    // Drag & Drop
-    let draggedElement = null;
+    // Heure actuellement sélectionnée
+    let selectedHour = null;
     
-    // Événements sur les heures draggables
-    zoneExercice.querySelectorAll('.frise-hour').forEach(hour => {
-        hour.addEventListener('dragstart', (e) => {
-            // Ne pas permettre de drag si correct
-            if (hour.classList.contains('correct')) {
-                e.preventDefault();
-                return;
-            }
-            
-            draggedElement = hour;
-            hour.classList.add('dragging');
-            e.dataTransfer.effectAllowed = 'move';
-        });
+    // Fonction pour gérer le clic sur une heure
+    function handleHourClick(hour) {
+        // Ne pas permettre de sélectionner si correct
+        if (hour.classList.contains('correct')) return;
         
-        hour.addEventListener('dragend', () => {
-            if (draggedElement) {
-                draggedElement.classList.remove('dragging');
-                draggedElement = null;
-            }
-            // Retirer tous les drag-over
-            zoneExercice.querySelectorAll('.frise-side').forEach(side => {
-                side.classList.remove('drag-over');
-            });
-        });
+        // Désélectionner l'ancienne heure
+        if (selectedHour) {
+            selectedHour.classList.remove('selected');
+        }
+        
+        // Sélectionner ou désélectionner
+        if (selectedHour === hour) {
+            selectedHour = null;
+        } else {
+            selectedHour = hour;
+            hour.classList.add('selected');
+        }
+    }
+    
+    // Événements sur les heures (délégation d'événements)
+    elementsContent.addEventListener('click', (e) => {
+        const hour = e.target.closest('.frise-hour');
+        if (hour) handleHourClick(hour);
+    });
+    
+    zoneExercice.addEventListener('click', (e) => {
+        const hour = e.target.closest('.frise-hour');
+        if (hour) {
+            handleHourClick(hour);
+            e.stopPropagation();
+        }
     });
     
     // Événements sur les côtés de la frise (zones de drop)
     zoneExercice.querySelectorAll('.frise-side').forEach(side => {
-        side.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            side.classList.add('drag-over');
-        });
-        
-        side.addEventListener('dragleave', () => {
-            side.classList.remove('drag-over');
-        });
-        
-        side.addEventListener('drop', (e) => {
-            e.preventDefault();
-            side.classList.remove('drag-over');
+        side.addEventListener('click', (e) => {
+            // Si on clique sur une heure, ne pas traiter ici
+            if (e.target.closest('.frise-hour')) return;
             
-            if (!draggedElement) return;
-            
-            // Si l'heure est déjà correcte, ne rien faire
-            if (draggedElement.classList.contains('correct')) return;
+            // Si pas d'heure sélectionnée, ne rien faire
+            if (!selectedHour) return;
             
             // Retirer les classes d'erreur précédentes
-            draggedElement.classList.remove('wrong');
+            selectedHour.classList.remove('wrong', 'selected');
             
             // Placer l'heure dans ce côté
-            side.appendChild(draggedElement);
-            
-            draggedElement.classList.remove('dragging');
-            draggedElement = null;
+            side.appendChild(selectedHour);
+            selectedHour = null;
         });
-    });
-    
-    // Permettre de remettre une heure dans le conteneur
-    hoursContainer.addEventListener('dragover', (e) => {
-        e.preventDefault();
-    });
-    
-    hoursContainer.addEventListener('drop', (e) => {
-        e.preventDefault();
-        if (draggedElement && !draggedElement.classList.contains('correct')) {
-            draggedElement.classList.remove('wrong');
-            hoursContainer.appendChild(draggedElement);
-            draggedElement.classList.remove('dragging');
-            draggedElement = null;
-        }
     });
     
     // Bouton vérifier
@@ -1997,6 +2077,242 @@ function afficherExercice2_3() {
             setTimeout(() => btnContinuer.style.display = 'block', 400);
         } else {
             messageDiv.innerHTML = creerMessageFeedback('error', '❌ Certaines heures sont mal placées, essaye encore !');
+        }
+    });
+}
+
+/**
+ * Exercice 3.1 : Ordre des images selon audio
+ */
+function afficherExercice3_1() {
+    const zoneExercice = document.getElementById('zoneExercice');
+    const btnContinuer = document.getElementById('btnContinuer');
+    
+    zoneExercice.style.display = 'block';
+    btnContinuer.style.display = 'none';
+    
+    // Associations audio -> images dans l'ordre
+    const audioAssociations = [
+        { sound: '3.1_a', images: ['eat', 'brush'] },
+        { sound: '3.1_b', images: ['school', 'work'] },
+        { sound: '3.1_c', images: ['dinner', 'sleep'] },
+        { sound: '3.1_d', images: ['shower', 'tv'] },
+        { sound: '3.1_e', images: ['play', 'playf'] }
+    ];
+    
+    // Toutes les images disponibles (mélangées)
+    const allImages = ['eat', 'brush', 'school', 'work', 'dinner', 'sleep', 'shower', 'tv', 'play', 'playf'];
+    const shuffledImages = shuffle([...allImages]);
+    
+    // Créer le HTML des lignes audio avec zones de drop
+    let audiosHTML = audioAssociations.map((item, index) => `
+        <div class="ordre-audio-row" data-index="${index}" data-expected="${item.images.join(',')}">
+            <button class="audio-btn" data-sound="${item.sound}" title="Écouter">
+                🔊
+            </button>
+            <div class="ordre-drop-zones">
+                <div class="ordre-drop-zone" data-position="0"></div>
+                <div class="ordre-drop-zone" data-position="1"></div>
+            </div>
+        </div>
+    `).join('');
+    
+    // Créer le HTML des images
+    let imagesHTML = shuffledImages.map(img => `
+        <div class="ordre-image" data-image="${img}">
+            <img src="assets/${img}.png" alt="${img}">
+        </div>
+    `).join('');
+    
+    zoneExercice.innerHTML = `
+        <div class="ordre-container">
+            <div class="ordre-audios">
+                ${audiosHTML}
+            </div>
+        </div>
+        <button class="ampm-verify-btn" id="btnVerifierOrdre">Vérifier ✓</button>
+        <div id="messageOrdre" class="message-match"></div>
+    `;
+    
+    // Afficher l'encadré des éléments
+    const elementsBox = document.getElementById('elementsBox');
+    const elementsContent = document.getElementById('elementsContent');
+    const elementsTitle = document.querySelector('.elements-title');
+    elementsBox.style.display = 'block';
+    elementsTitle.textContent = '📦 Images';
+    elementsContent.innerHTML = `
+        <div class="ordre-images-container" id="ordreImagesContainer">
+            ${imagesHTML}
+        </div>
+    `;
+    
+    const messageDiv = document.getElementById('messageOrdre');
+    const imagesContainer = document.getElementById('ordreImagesContainer');
+    
+    // Audio actuellement en cours
+    let currentAudio = null;
+    
+    // Image actuellement sélectionnée
+    let selectedImage = null;
+    
+    // Événements sur les boutons audio
+    zoneExercice.querySelectorAll('.audio-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const soundName = btn.dataset.sound;
+            
+            // Arrêter l'audio en cours
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                document.querySelectorAll('.audio-btn').forEach(b => b.classList.remove('playing'));
+            }
+            
+            // Jouer le nouveau son
+            currentAudio = new Audio(`sounds/${soundName}.wav`);
+            btn.classList.add('playing');
+            
+            currentAudio.play();
+            currentAudio.onended = () => {
+                btn.classList.remove('playing');
+            };
+        });
+    });
+    
+    // Fonction pour gérer le clic sur une image
+    function handleImageClick(img) {
+        // Ne pas permettre de sélectionner si dans une zone validée
+        const parentRow = img.closest('.ordre-audio-row');
+        if (parentRow && parentRow.classList.contains('validated')) {
+            return;
+        }
+        
+        // Désélectionner l'ancienne image
+        if (selectedImage) {
+            selectedImage.classList.remove('selected');
+        }
+        
+        // Sélectionner ou désélectionner
+        if (selectedImage === img) {
+            selectedImage = null;
+        } else {
+            selectedImage = img;
+            img.classList.add('selected');
+        }
+    }
+    
+    // Événements sur les images (délégation d'événements)
+    elementsContent.addEventListener('click', (e) => {
+        const img = e.target.closest('.ordre-image');
+        if (img) handleImageClick(img);
+    });
+    
+    zoneExercice.addEventListener('click', (e) => {
+        const img = e.target.closest('.ordre-image');
+        if (img) handleImageClick(img);
+    });
+    
+    // Événements sur les zones de drop
+    zoneExercice.querySelectorAll('.ordre-drop-zone').forEach(zone => {
+        zone.addEventListener('click', (e) => {
+            const row = zone.closest('.ordre-audio-row');
+            
+            // Si zone déjà validée, ne rien faire
+            if (row && row.classList.contains('validated')) return;
+            
+            // Si on clique sur une image dans la zone, ne pas traiter ici
+            if (e.target.closest('.ordre-image')) return;
+            
+            // Si pas d'image sélectionnée, ne rien faire
+            if (!selectedImage) return;
+            
+            // Si la zone contient déjà une image, la remettre dans le conteneur
+            const existingImage = zone.querySelector('.ordre-image');
+            if (existingImage) {
+                existingImage.classList.remove('selected');
+                imagesContainer.appendChild(existingImage);
+                zone.classList.remove('has-image');
+            }
+            
+            // Placer l'image dans la zone
+            selectedImage.classList.remove('selected');
+            zone.appendChild(selectedImage);
+            zone.classList.add('has-image');
+            selectedImage = null;
+        });
+    });
+    
+    // Bouton vérifier
+    document.getElementById('btnVerifierOrdre').addEventListener('click', () => {
+        let toutCorrect = true;
+        let toutRempli = true;
+        
+        zoneExercice.querySelectorAll('.ordre-audio-row').forEach(row => {
+            // Si déjà validé, on passe
+            if (row.classList.contains('validated')) return;
+            
+            const expectedImages = row.dataset.expected.split(',');
+            const zones = row.querySelectorAll('.ordre-drop-zone');
+            let rowCorrect = true;
+            let rowRempli = true;
+            
+            // Réinitialiser les classes
+            zones.forEach(zone => zone.classList.remove('correct', 'wrong'));
+            row.classList.remove('error');
+            
+            zones.forEach((zone, index) => {
+                const placedImage = zone.querySelector('.ordre-image');
+                
+                if (!placedImage) {
+                    rowRempli = false;
+                    toutRempli = false;
+                    toutCorrect = false;
+                } else if (placedImage.dataset.image === expectedImages[index]) {
+                    zone.classList.add('correct');
+                } else {
+                    zone.classList.add('wrong');
+                    rowCorrect = false;
+                    toutCorrect = false;
+                }
+            });
+            
+            if (!rowRempli) {
+                row.classList.add('error');
+            } else if (rowCorrect) {
+                row.classList.add('validated');
+            } else {
+                row.classList.add('error');
+                // Remettre les images incorrectes dans le conteneur après l'animation
+                setTimeout(() => {
+                    zones.forEach(zone => {
+                        if (zone.classList.contains('wrong')) {
+                            const img = zone.querySelector('.ordre-image');
+                            if (img) {
+                                imagesContainer.appendChild(img);
+                                zone.classList.remove('has-image', 'wrong');
+                            }
+                        }
+                    });
+                    row.classList.remove('error');
+                }, 600);
+            }
+        });
+        
+        // Vérifier si tout est validé
+        const totalRows = zoneExercice.querySelectorAll('.ordre-audio-row').length;
+        const validatedRows = zoneExercice.querySelectorAll('.ordre-audio-row.validated').length;
+        
+        if (!toutRempli) {
+            messageDiv.innerHTML = creerMessageFeedback('warning', '⚠️ Place deux images pour chaque audio !');
+        } else if (validatedRows === totalRows) {
+            messageDiv.innerHTML = creerMessageFeedback('success', '🎉 Perfect!');
+            exerciceTermine = true;
+            setTimeout(() => btnContinuer.style.display = 'block', 400);
+        } else if (toutCorrect) {
+            messageDiv.innerHTML = creerMessageFeedback('success', '🎉 Perfect!');
+            exerciceTermine = true;
+            setTimeout(() => btnContinuer.style.display = 'block', 400);
+        } else {
+            messageDiv.innerHTML = creerMessageFeedback('error', '❌ Certaines images sont mal placées, essaye encore !');
         }
     });
 }
@@ -2381,8 +2697,24 @@ function createSpeakerFloat(nom, texte, type = 'chat') {
     wrapper.className = 'speaker-float';
     
     // Créer l'avatar selon le type
-    const imgSrc = type === 'koala' ? 'assets/koala.jpg' : 'assets/cat.jpg';
-    const imgAlt = type === 'koala' ? 'Professeur Panda' : 'Monsieur Chat';
+    let imgSrc, imgAlt;
+    switch(type) {
+        case 'koala':
+            imgSrc = 'assets/koala.jpg';
+            imgAlt = 'Professeur Panda';
+            break;
+        case 'ecureuil':
+            imgSrc = 'assets/ecureuil.jpg';
+            imgAlt = 'Écureuil Noisette';
+            break;
+        case 'panda':
+            imgSrc = 'assets/panda.jpg';
+            imgAlt = 'Maître Panda';
+            break;
+        default:
+            imgSrc = 'assets/cat.jpg';
+            imgAlt = 'Monsieur Chat';
+    }
     
     wrapper.innerHTML = `
         <div class="personnage-dialogue">
