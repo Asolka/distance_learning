@@ -143,9 +143,8 @@ const niveaux = [
     { id: 11, type: 'exercice', nom: 'Exercise 3.2', emoji: '✏️' },
     { id: 12, type: 'exercice', nom: 'Exercise 3.3', emoji: '✏️' },
     
-    // Évaluation finale (2 niveaux séparés)
-    { id: 13, type: 'evaluation1', nom: 'Evaluation 1', emoji: '🏆' },
-    { id: 14, type: 'evaluation2', nom: 'Evaluation 2', emoji: '🏆' }
+    // Évaluation finale
+    { id: 13, type: 'evaluation', nom: 'Évaluation', emoji: '🏆' }
 ];
 
 /** Score de l'évaluation (sur 5 points) */
@@ -251,12 +250,9 @@ function genererNiveaux() {
             // Ritual : centré en haut
             div.style.cssText = `left: 50%; top: ${yPosition}px; transform: translateX(-50%)`;
             yPosition += 350;
-        } else if (niveau.type === 'evaluation1') {
-            // Évaluation 1 : à gauche en bas
-            div.style.cssText = `left: 35%; top: ${yPosition + 150}px; transform: translateX(-50%)`;
-        } else if (niveau.type === 'evaluation2') {
-            // Évaluation 2 : à droite en bas
-            div.style.cssText = `left: 65%; top: ${yPosition + 150}px; transform: translateX(-50%)`;
+        } else if (niveau.type === 'evaluation') {
+            // Évaluation : centrée en bas (remontée de 50px)
+            div.style.cssText = `left: 50%; top: ${yPosition + 150}px; transform: translateX(-50%)`;
         } else {
             // Autres niveaux : alternance gauche/droite
             const posIndex = index % positionsX.length;
@@ -265,7 +261,7 @@ function genererNiveaux() {
             // Espacement avant le prochain niveau
             if (index < niveaux.length - 1) {
                 const niveauSuivant = niveaux[index + 1];
-                yPosition += (niveauSuivant.type === 'cours' || niveauSuivant.type === 'evaluation1')
+                yPosition += (niveauSuivant.type === 'cours' || niveauSuivant.type === 'evaluation')
                     ? ESPACEMENT_BLOC
                     : ESPACEMENT_NORMAL;
             }
@@ -308,22 +304,13 @@ function genererNiveaux() {
  * Détermine si un niveau est le prochain à débloquer
  */
 function determinerSiProchainNiveau(niveau, index) {
-    // Mode admin : tout est débloqué sauf les niveaux déjà complétés
-    if (modeAdmin && !niveauxCompletes.includes(niveau.id)) {
-        return true;
-    }
-    
     if (niveau.type === 'ritual') {
         return !niveauxCompletes.includes(0);
     }
-    if (niveau.type === 'evaluation1') {
-        // Evaluation 1 disponible si tous les exercices sont terminés
+    if (niveau.type === 'evaluation') {
+        // L'évaluation est disponible si tous les exercices sont terminés
         const idsExercices = niveaux.filter(n => n.type === 'exercice').map(n => n.id);
-        return idsExercices.every(id => niveauxCompletes.includes(id)) && !niveauxCompletes.includes(niveau.id);
-    }
-    if (niveau.type === 'evaluation2') {
-        // Evaluation 2 disponible si evaluation 1 est terminée
-        return niveauxCompletes.includes(13) && !niveauxCompletes.includes(niveau.id);
+        return idsExercices.every(id => niveauxCompletes.includes(id));
     }
     // Pour les autres : disponible si tous les précédents sont complétés
     return niveauxCompletes.length === index;
@@ -340,8 +327,8 @@ function dessinerChemins() {
         const niveauCourant = niveaux[i];
         const niveauSuivant = niveaux[i + 1];
         
-        // Pas de chemin avant un cours (espace entre blocs) ou avant evaluation1
-        if (niveauSuivant.type === 'cours' || niveauSuivant.type === 'evaluation1') {
+        // Pas de chemin vers évaluation ou avant un cours (espace entre blocs)
+        if (niveauSuivant.type === 'evaluation' || niveauSuivant.type === 'cours') {
             continue;
         }
         
@@ -374,30 +361,6 @@ function dessinerChemins() {
             svg.appendChild(path);
         }
     }
-    
-    // Dessiner le trait entre evaluation1 et evaluation2
-    const eval1 = document.getElementById('niveau-13');
-    const eval2 = document.getElementById('niveau-14');
-    if (eval1 && eval2) {
-        const rect1 = eval1.getBoundingClientRect();
-        const rect2 = eval2.getBoundingClientRect();
-        const svgRect = svg.getBoundingClientRect();
-        
-        const x1 = rect1.left + rect1.width / 2 - svgRect.left;
-        const y1 = rect1.top + rect1.height / 2 - svgRect.top;
-        const x2 = rect2.left + rect2.width / 2 - svgRect.left;
-        const y2 = rect2.top + rect2.height / 2 - svgRect.top;
-        
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
-        path.setAttribute('stroke', niveauxCompletes.includes(13) ? '#38ef7d' : '#95a5a6');
-        path.setAttribute('stroke-width', '20');
-        path.setAttribute('fill', 'none');
-        path.setAttribute('stroke-linecap', 'round');
-        path.style.filter = 'drop-shadow(0 3px 5px rgba(0,0,0,0.3))';
-        
-        svg.appendChild(path);
-    }
 }
 
 // Redessiner les chemins lors du redimensionnement
@@ -426,13 +389,11 @@ document.addEventListener('keydown', (e) => {
 function activerModeAdmin() {
     modeAdmin = true;
     
-    // Marquer tous les niveaux comme complétés SAUF les évaluations
-    niveauxCompletes = niveaux
-        .filter(n => n.type !== 'evaluation1' && n.type !== 'evaluation2')
-        .map(n => n.id);
+    // Débloquer tous les niveaux
+    niveauxCompletes = niveaux.map(n => n.id);
     
     // Afficher notification
-    afficherNotificationAdmin('🔓 Mode Admin activé ! Évaluations accessibles.');
+    afficherNotificationAdmin('🔓 Mode Admin activé ! Tous les niveaux débloqués.');
     
     // Régénérer les niveaux
     genererNiveaux();
@@ -498,20 +459,14 @@ function skipNiveau() {
  */
 function ouvrirNiveau(id) {
     const niveauEl = document.getElementById(`niveau-${id}`);
-    const niveauData = niveaux.find(n => n.id === id);
-    
-    // Si c'est une évaluation complétée, afficher le résultat
-    if ((niveauData.type === 'evaluation1' || niveauData.type === 'evaluation2') && 
-        niveauxCompletes.includes(id)) {
-        afficherResultatFinal();
-        return;
-    }
     
     // Ignorer si verrouillé
     if (niveauEl.classList.contains('niveau-verrouille')) return;
     
     niveauActuel = id;
     exerciceTermine = false;
+    
+    const niveauData = niveaux.find(n => n.id === id);
     
     // Afficher le contenu selon le type
     switch (niveauData.type) {
@@ -769,18 +724,11 @@ function afficherDialogue(niveauId) {
                 createSpeakerFloat('Monsieur Chat', texteDialogue.textContent, 'chat');
             }
         },
-        evaluation1: () => {
-            // Évaluation niveau 1
+        evaluation: () => {
+            // Évaluation - commence toujours par l'étape 1
+            etapeEvaluation = 1;
             texteDialogue.textContent = `${nomJoueur}, écoute bien les audios. Ils présentent la journée très chargée de notre ami Écureuil Noisette ! Sélectionne l'audio avec la bonne activité, puis l'image correspondante, et enfin le bon moment de la journée avec le soleil ou la lune ! Bon courage !`;
             afficherEvaluation1();
-            exerciceTermine = false;
-            removeSpeakerFloat();
-            createSpeakerFloat('Professeur Panda', texteDialogue.textContent, 'koala');
-        },
-        evaluation2: () => {
-            // Évaluation niveau 2
-            texteDialogue.textContent = `${nomJoueur}, voici 6 moments importants de la journée de notre Mascotte. Pour chaque image, construit la phrase en anglais qui décrit ce qu'elle fait et à quelle heure ! Utilise les listes déroulantes pour choisir les mots et l'heure au bon endroit.`;
-            afficherEvaluation2();
             exerciceTermine = false;
             removeSpeakerFloat();
             createSpeakerFloat('Professeur Panda', texteDialogue.textContent, 'koala');
@@ -796,6 +744,27 @@ function afficherDialogue(niveauId) {
 document.getElementById('btnContinuer').addEventListener('click', () => {
     const container = document.getElementById('dialogueContainer');
     const btnContinuer = document.getElementById('btnContinuer');
+    const zoneExercice = document.getElementById('zoneExercice');
+    const texteDialogue = document.getElementById('texteDialogue');
+    
+    // Si on est dans l'évaluation et qu'on passe au niveau 2
+    if (niveauActuel === 13 && etapeEvaluation === 1 && btnContinuer.textContent === 'Suivant →') {
+        etapeEvaluation = 2;
+        
+        // Afficher le niveau 2 de l'évaluation
+        texteDialogue.textContent = `${nomJoueur}, dernière étape de l'évaluation ! À venir...`;
+        zoneExercice.innerHTML = '<p style="text-align: center; padding: 20px; font-size: 1.2em;">Niveau 2 de l\'évaluation à venir...</p>';
+        btnContinuer.style.display = 'none';
+        btnContinuer.textContent = 'Continue →';
+        
+        // TODO: Appeler afficherEvaluation2() ici quand elle sera créée
+        exerciceTermine = true;
+        setTimeout(() => btnContinuer.style.display = 'block', 400);
+        
+        removeSpeakerFloat();
+        createSpeakerFloat('Professeur Panda', texteDialogue.textContent, 'koala');
+        return;
+    }
     
     container.style.display = 'none';
     document.getElementById('elementsBox').style.display = 'none';
@@ -1091,10 +1060,9 @@ function creerMessageFeedback(type, texte) {
     const couleurs = {
         success: '#2ecc71, #27ae60',
         error: '#e74c3c, #c0392b',
-        warning: '#f39c12, #f1c40f',
-        info: '#3498db, #2980b9'
+        warning: '#f39c12, #f1c40f'
     };
-    return `<div class="message-date" style="background: linear-gradient(135deg, ${couleurs[type] || couleurs.info}); color: white;">${texte}</div>`;
+    return `<div class="message-date" style="background: linear-gradient(135deg, ${couleurs[type]}); color: white;">${texte}</div>`;
 }
 
 /* ============================================================
@@ -1107,10 +1075,6 @@ function creerMessageFeedback(type, texte) {
 function afficherExercice1_1() {
     const zoneExercice = document.getElementById('zoneExercice');
     const btnContinuer = document.getElementById('btnContinuer');
-    const dialogueContainer = document.getElementById('dialogueContainer');
-    
-    // Cacher le personnage à gauche
-    dialogueContainer.classList.add('hide-left-chat');
     
     zoneExercice.style.display = 'block';
     btnContinuer.style.display = 'none';
@@ -1284,10 +1248,6 @@ function creerBlocMot(pair) {
 function afficherExercice1_2() {
     const zoneExercice = document.getElementById('zoneExercice');
     const btnContinuer = document.getElementById('btnContinuer');
-    const dialogueContainer = document.getElementById('dialogueContainer');
-    
-    // Cacher le personnage à gauche
-    dialogueContainer.classList.add('hide-left-chat');
     
     zoneExercice.style.display = 'block';
     btnContinuer.style.display = 'none';
@@ -1476,10 +1436,6 @@ function afficherExercice1_2() {
 function afficherExercice1_3() {
     const zoneExercice = document.getElementById('zoneExercice');
     const btnContinuer = document.getElementById('btnContinuer');
-    const dialogueContainer = document.getElementById('dialogueContainer');
-    
-    // Cacher le personnage à gauche
-    dialogueContainer.classList.add('hide-left-chat');
     
     zoneExercice.style.display = 'block';
     btnContinuer.style.display = 'none';
@@ -1701,10 +1657,6 @@ function afficherExercice1_3() {
 function afficherExercice2_1() {
     const zoneExercice = document.getElementById('zoneExercice');
     const btnContinuer = document.getElementById('btnContinuer');
-    const dialogueContainer = document.getElementById('dialogueContainer');
-    
-    // Cacher le personnage à gauche
-    dialogueContainer.classList.add('hide-left-chat');
     
     zoneExercice.style.display = 'block';
     btnContinuer.style.display = 'none';
@@ -1837,10 +1789,6 @@ function afficherExercice2_1() {
 function afficherExercice2_2() {
     const zoneExercice = document.getElementById('zoneExercice');
     const btnContinuer = document.getElementById('btnContinuer');
-    const dialogueContainer = document.getElementById('dialogueContainer');
-    
-    // Cacher le personnage à gauche
-    dialogueContainer.classList.add('hide-left-chat');
     
     zoneExercice.style.display = 'block';
     btnContinuer.style.display = 'none';
@@ -1997,10 +1945,6 @@ function afficherExercice2_2() {
 function afficherExercice2_3() {
     const zoneExercice = document.getElementById('zoneExercice');
     const btnContinuer = document.getElementById('btnContinuer');
-    const dialogueContainer = document.getElementById('dialogueContainer');
-    
-    // Cacher le personnage à gauche
-    dialogueContainer.classList.add('hide-left-chat');
     
     zoneExercice.style.display = 'block';
     btnContinuer.style.display = 'none';
@@ -2175,10 +2119,6 @@ function afficherExercice2_3() {
 function afficherExercice3_1() {
     const zoneExercice = document.getElementById('zoneExercice');
     const btnContinuer = document.getElementById('btnContinuer');
-    const dialogueContainer = document.getElementById('dialogueContainer');
-    
-    // Cacher le personnage à gauche
-    dialogueContainer.classList.add('hide-left-chat');
     
     zoneExercice.style.display = 'block';
     btnContinuer.style.display = 'none';
@@ -2415,10 +2355,6 @@ function afficherExercice3_1() {
 function afficherExercice3_2() {
     const zoneExercice = document.getElementById('zoneExercice');
     const btnContinuer = document.getElementById('btnContinuer');
-    const dialogueContainer = document.getElementById('dialogueContainer');
-    
-    // Cacher le personnage à gauche
-    dialogueContainer.classList.add('hide-left-chat');
     
     zoneExercice.style.display = 'block';
     btnContinuer.style.display = 'none';
@@ -2582,10 +2518,6 @@ function afficherExercice3_2() {
 function afficherExercice3_3() {
     const zoneExercice = document.getElementById('zoneExercice');
     const btnContinuer = document.getElementById('btnContinuer');
-    const dialogueContainer = document.getElementById('dialogueContainer');
-    
-    // Cacher le personnage à gauche
-    dialogueContainer.classList.add('hide-left-chat');
     
     zoneExercice.style.display = 'block';
     btnContinuer.style.display = 'none';
@@ -2755,12 +2687,6 @@ function afficherEvaluation1() {
     const elementsBox = document.getElementById('elementsBox');
     const elementsContent = document.getElementById('elementsContent');
     const elementsTitle = document.querySelector('.elements-title');
-    const dialogueContainer = document.getElementById('dialogueContainer');
-    const dialogueBox = document.querySelector('.dialogue-box');
-    
-    // Cacher le personnage à gauche et le texte en haut
-    dialogueContainer.classList.add('hide-left-chat');
-    dialogueBox.classList.add('hide-speaker');
     
     zoneExercice.style.display = 'block';
     btnContinuer.style.display = 'none';
@@ -2987,7 +2913,7 @@ function afficherEvaluation1() {
             if (lignesValidees === 5) {
                 messageDiv.innerHTML = creerMessageFeedback('success', `🎉 Parfait ! Score : ${scoreEvaluation.toFixed(1)}/2 points`);
             } else {
-                messageDiv.innerHTML = creerMessageFeedback('info', `Score : ${scoreEvaluation.toFixed(1)}/2 points`);
+                messageDiv.innerHTML = creerMessageFeedback('error', `Score : ${scoreEvaluation.toFixed(1)}/2 points`);
             }
             
             // Verrouiller toutes les interactions
@@ -3005,269 +2931,11 @@ function afficherEvaluation1() {
             
             elementsBox.style.display = 'none';
             
-            // Afficher le bouton Continue
+            // Changer le texte du bouton en "Suivant"
+            btnContinuer.textContent = 'Suivant →';
             setTimeout(() => btnContinuer.style.display = 'block', 400);
-            exerciceTermine = true;
+            exerciceTermine = false; // Ne pas terminer l'évaluation, passer au niveau 2
         }
-    });
-}
-
-/**
- * Évaluation niveau 2 : Construire des phrases avec listes déroulantes
- * 6 phrases à compléter, chaque phrase correcte = 0.5 points
- */
-function afficherEvaluation2() {
-    const zoneExercice = document.getElementById('zoneExercice');
-    const btnContinuer = document.getElementById('btnContinuer');
-    const elementsBox = document.getElementById('elementsBox');
-    const dialogueContainer = document.getElementById('dialogueContainer');
-    const dialogueBox = document.querySelector('.dialogue-box');
-    
-    // Cacher le personnage à gauche et le texte en haut
-    dialogueContainer.classList.add('hide-left-chat');
-    dialogueBox.classList.add('hide-speaker');
-    
-    zoneExercice.style.display = 'block';
-    btnContinuer.style.display = 'none';
-    elementsBox.style.display = 'none';
-    
-    // Configuration des phrases
-    const evalData = [
-        { image: 'eval_wake', verb: 'wake up', hour: '7:00', ampm: 'AM' },
-        { image: 'eval_lunch', verb: 'have lunch', hour: '12:00', ampm: 'PM' },
-        { image: 'eval_work', verb: 'do my homework', hour: '5:30', ampm: 'PM' },
-        { image: 'eval_school', verb: 'go to school', hour: '8:00', ampm: 'AM' },
-        { image: 'eval_shower', verb: 'take a shower', hour: '7:00', ampm: 'PM' },
-        { image: 'eval_bed', verb: 'go to bed', hour: '9:30', ampm: 'PM' }
-    ];
-    
-    // Toutes les options possibles
-    const allVerbs = ['wake up', 'have lunch', 'do my homework', 'go to school', 'take a shower', 'go to bed'];
-    const allHours = ['7:00', '8:00', '9:30', '12:00', '5:30'];
-    const ampmOptions = ['AM', 'PM'];
-    
-    // Mélanger les données
-    const shuffledData = shuffle([...evalData]);
-    
-    // Créer le HTML
-    let rowsHTML = shuffledData.map((item, index) => {
-        // Pour chaque ligne, créer 3 options de verbes (le bon + 2 autres)
-        let verbChoices = [item.verb];
-        const otherVerbs = allVerbs.filter(v => v !== item.verb);
-        const randomVerbs = shuffle([...otherVerbs]).slice(0, 2);
-        verbChoices = shuffle([...verbChoices, ...randomVerbs]);
-        
-        // Pour chaque ligne, créer 3 options d'heures (la bonne + 2 autres)
-        let hourChoices = [item.hour];
-        const otherHours = allHours.filter(h => h !== item.hour);
-        const randomHours = shuffle([...otherHours]).slice(0, 2);
-        hourChoices = shuffle([...hourChoices, ...randomHours]);
-        
-        const verbOptionsHTML = verbChoices.map(v => 
-            `<option value="${v}">${v}</option>`
-        ).join('');
-        
-        const hourOptionsHTML = hourChoices.map(h => 
-            `<option value="${h}">${h}</option>`
-        ).join('');
-        
-        const ampmOptionsHTML = ampmOptions.map(a => 
-            `<option value="${a}">${a}</option>`
-        ).join('');
-        
-        return `
-            <div class="eval2-row" data-index="${index}" data-verb="${item.verb}" data-hour="${item.hour}" data-ampm="${item.ampm}">
-                <div class="eval2-image">
-                    <img src="assets/${item.image}.jpg" alt="${item.image}">
-                </div>
-                <div class="eval2-phrase">
-                    <span class="eval2-text">I</span>
-                    <select class="eval2-select eval2-verb" data-type="verb">
-                        <option value="">-- verb --</option>
-                        ${verbOptionsHTML}
-                    </select>
-                    <span class="eval2-text">at</span>
-                    <select class="eval2-select eval2-hour" data-type="hour">
-                        <option value="">-- hour --</option>
-                        ${hourOptionsHTML}
-                    </select>
-                    <select class="eval2-select eval2-ampm" data-type="ampm">
-                        <option value="">--</option>
-                        ${ampmOptionsHTML}
-                    </select>
-                </div>
-            </div>
-        `;
-    }).join('');
-    
-    zoneExercice.innerHTML = `
-        <div class="eval2-container">
-            ${rowsHTML}
-        </div>
-        <button class="ampm-verify-btn" id="btnVerifierEval2">Vérifier ✓</button>
-        <div id="messageEval2" class="message-match"></div>
-    `;
-    
-    const messageDiv = document.getElementById('messageEval2');
-    
-    // Bouton vérifier
-    document.getElementById('btnVerifierEval2').addEventListener('click', () => {
-        let scoreNiveau2 = 0;
-        let toutRempli = true;
-        
-        zoneExercice.querySelectorAll('.eval2-row').forEach(row => {
-            const expectedVerb = row.dataset.verb;
-            const expectedHour = row.dataset.hour;
-            const expectedAmpm = row.dataset.ampm;
-            
-            const selectedVerb = row.querySelector('.eval2-verb').value;
-            const selectedHour = row.querySelector('.eval2-hour').value;
-            const selectedAmpm = row.querySelector('.eval2-ampm').value;
-            
-            // Réinitialiser les classes
-            row.classList.remove('correct', 'wrong', 'error');
-            row.querySelectorAll('.eval2-select').forEach(s => s.classList.remove('correct', 'wrong'));
-            
-            if (!selectedVerb || !selectedHour || !selectedAmpm) {
-                toutRempli = false;
-                row.classList.add('error');
-                return;
-            }
-            
-            const verbCorrect = selectedVerb === expectedVerb;
-            const hourCorrect = selectedHour === expectedHour;
-            const ampmCorrect = selectedAmpm === expectedAmpm;
-            
-            // Marquer chaque select
-            row.querySelector('.eval2-verb').classList.add(verbCorrect ? 'correct' : 'wrong');
-            row.querySelector('.eval2-hour').classList.add(hourCorrect ? 'correct' : 'wrong');
-            row.querySelector('.eval2-ampm').classList.add(ampmCorrect ? 'correct' : 'wrong');
-            
-            if (verbCorrect && hourCorrect && ampmCorrect) {
-                row.classList.add('correct');
-                scoreNiveau2 += 0.5;
-            } else {
-                row.classList.add('wrong');
-            }
-        });
-        
-        if (!toutRempli) {
-            messageDiv.innerHTML = creerMessageFeedback('warning', '⚠️ Complete toutes les phrases !');
-            return;
-        }
-        
-        // Verrouiller tout
-        zoneExercice.querySelectorAll('.eval2-row').forEach(row => {
-            row.classList.add('locked');
-        });
-        zoneExercice.querySelectorAll('.eval2-select').forEach(select => {
-            select.disabled = true;
-        });
-        
-        // Cacher le bouton vérifier
-        document.getElementById('btnVerifierEval2').style.display = 'none';
-        
-        // Calculer le score final (niveau 1 + niveau 2)
-        const scoreFinal = scoreEvaluation + scoreNiveau2;
-        scoreEvaluation = scoreFinal;
-        
-        // Afficher le score de ce niveau
-        messageDiv.innerHTML = creerMessageFeedback('info', `Score niveau 2 : ${scoreNiveau2.toFixed(1)}/3 points`);
-        
-        // Afficher le bouton pour voir le résultat final
-        btnContinuer.textContent = 'Voir mon résultat →';
-        btnContinuer.onclick = () => afficherResultatFinal();
-        setTimeout(() => btnContinuer.style.display = 'block', 400);
-    });
-}
-
-/**
- * Affiche le résultat final avec les étoiles
- */
-function afficherResultatFinal() {
-    const dialogueContainer = document.getElementById('dialogueContainer');
-    
-    // Cacher le dialogue principal
-    dialogueContainer.style.display = 'none';
-    removeSpeakerFloat();
-    
-    // Calculer le nombre d'étoiles (score sur 5)
-    const etoiles = Math.round(scoreEvaluation);
-    
-    // Générer les étoiles
-    let etoilesHTML = '';
-    for (let i = 1; i <= 5; i++) {
-        if (i <= etoiles) {
-            etoilesHTML += `<span class="etoile pleine" style="animation-delay: ${i * 0.15}s">★</span>`;
-        } else {
-            etoilesHTML += '<span class="etoile vide">☆</span>';
-        }
-    }
-    
-    // Message selon le score
-    let message = '';
-    let messageClass = '';
-    if (etoiles >= 4) {
-        message = `🎉 Félicitations ${nomJoueur} ! Tu as été excellent(e) ! Continue comme ça !`;
-        messageClass = 'success';
-    } else if (etoiles === 3) {
-        message = `👍 Bien joué ${nomJoueur} ! Tu es sur la bonne voie, encore un petit effort !`;
-        messageClass = 'info';
-    } else {
-        message = `💪 Ne te décourage pas ${nomJoueur} ! Révise les leçons et tu feras mieux la prochaine fois !`;
-        messageClass = 'warning';
-    }
-    
-    // Créer l'overlay de résultat
-    const overlay = document.createElement('div');
-    overlay.className = 'resultat-overlay';
-    overlay.id = 'resultatOverlay';
-    
-    // Générer les confettis
-    let confettisHTML = '';
-    const colors = ['#f1c40f', '#e74c3c', '#3498db', '#2ecc71', '#9b59b6', '#ff9a56'];
-    for (let i = 0; i < 50; i++) {
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        const left = Math.random() * 100;
-        const delay = Math.random() * 3;
-        const duration = 3 + Math.random() * 2;
-        confettisHTML += `<div class="confetti" style="left: ${left}%; background: ${color}; animation-delay: ${delay}s; animation-duration: ${duration}s;"></div>`;
-    }
-    
-    overlay.innerHTML = `
-        <div class="confettis-container">${confettisHTML}</div>
-        <div class="resultat-box">
-            <div class="personnage-dialogue">
-                <img src="assets/koala.jpg" alt="Professeur Panda">
-            </div>
-            <div class="resultat-content">
-                <h2>🏆 Ton résultat 🏆</h2>
-                <div class="score-etoiles">
-                    ${etoilesHTML}
-                </div>
-                <div class="score-chiffre">${scoreEvaluation.toFixed(1)} / 5</div>
-                <div class="message-resultat ${messageClass}">
-                    ${message}
-                </div>
-                <button class="bouton-continuer" id="btnTerminer">Terminer →</button>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(overlay);
-    
-    // Animation d'apparition
-    requestAnimationFrame(() => overlay.classList.add('show'));
-    
-    // Événement sur le bouton terminer
-    document.getElementById('btnTerminer').addEventListener('click', () => {
-        overlay.classList.remove('show');
-        setTimeout(() => {
-            overlay.remove();
-            etapeEvaluation = 1;
-            scoreEvaluation = 0;
-            completerNiveau(niveauActuel);
-        }, 400);
     });
 }
 
